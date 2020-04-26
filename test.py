@@ -31,10 +31,9 @@ class TestMaven(unittest.TestCase):
         self.assertGreater(len(pom.dependencies), 0)
         artifact = "scalatest_2.11"
         artifact_tag = f"<artifactId>{artifact}</artifactId>"
-        scalatest_dep_list = list(filter(
-            lambda d: d.artifact == artifact, pom.dependencies))
-        self.assertEqual(1, len(scalatest_dep_list))
-        scalatest_dep_list[0].set_version(new_version)
+        dep = pom.get_dependency(artifact)
+        self.assertIsNotNone(dep)
+        dep.set_version(new_version)
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
         with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
@@ -67,11 +66,10 @@ class TestMaven(unittest.TestCase):
         pom = Pom(input_filename)
         self.assertGreater(len(pom.dependencies), 0)
         artifact = "scala-library"
-        scalalib_dep_list = list(filter(
-            lambda d: d.artifact == artifact, pom.dependencies))
-        self.assertEqual(1, len(scalalib_dep_list))
-        scalalib_dep_list[0].set_version(new_version)
-        prop_name = scalalib_dep_list[0].prop_name
+        dep = pom.get_dependency(artifact)
+        self.assertIsNotNone(dep)
+        dep.set_version(new_version)
+        prop_name = dep.prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
@@ -102,15 +100,13 @@ class TestMaven(unittest.TestCase):
         self.assertGreater(len(pom.dependencies), 0)
         artifact1 = "logback-classic"
         artifact2 = "logback-core"
-        artifact1_dep_list = list(filter(
-            lambda d: d.artifact == artifact1, pom.dependencies))
-        self.assertEqual(1, len(artifact1_dep_list))
-        artifact1_dep_list[0].set_version(new_version)
-        artifact2_dep_list = list(filter(
-            lambda d: d.artifact == artifact2, pom.dependencies))
-        self.assertEqual(1, len(artifact2_dep_list))
-        self.assertEqual(new_version, artifact2_dep_list[0].version_xml.text)
-        prop_name = artifact1_dep_list[0].prop_name
+        dep1 = pom.get_dependency(artifact1)
+        self.assertIsNotNone(dep1)
+        dep1.set_version(new_version)
+        dep2 = pom.get_dependency(artifact2)
+        self.assertIsNotNone(dep2)
+        self.assertEqual(new_version, dep2.version)
+        prop_name = dep1.prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))

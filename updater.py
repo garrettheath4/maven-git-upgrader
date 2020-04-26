@@ -12,6 +12,8 @@ updater.py (the main script; this script)
     +-> Branch (represents the Git branch that the update will be contained in)
     |
     +-> Pom (represents the Maven pom.xml file that needs to be modified)
+        |
+        +-> Dependency (represents a single dependency element in the Pom xml)
 """
 
 import sys

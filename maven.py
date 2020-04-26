@@ -28,16 +28,17 @@ class Dependency:
             log.warning("Dependency group XML should not be None!")
         self.group: str = group_xml.text
         self.artifact: str = dependency_xml.find(M+"artifactId", NS).text
-        self.version_xml: Optional[ET.Element] = \
+        self._version_xml: Optional[ET.Element] = \
             dependency_xml.find(M+"version", NS)
-        if self.version_xml.text.startswith("${"):
-            self.prop_name = re.findall(r'\${([^}]+)}', self.version_xml.text)[0]
-            self.version_xml = properties_xml.find(M+self.prop_name, NS)
+        if self._version_xml.text.startswith("${"):
+            self.prop_name = re.findall(r'\${([^}]+)}', self._version_xml.text)[0]
+            self._version_xml = properties_xml.find(M + self.prop_name, NS)
         else:
             self.prop_name = None
+        self.version = self._version_xml.text
 
     def set_version(self, version_number: str):
-        self.version_xml.text = str(version_number)
+        self._version_xml.text = str(version_number)
 
 
 class Pom:
@@ -51,6 +52,21 @@ class Pom:
             lambda d: Dependency(d, self._properties_xml),
             filter(lambda x: x.tag == NSM+"dependency",
                    self._dependencies_xml)))
+
+    def get_dependency(self, artifact_id: str,
+                       group_id: str = None,
+                       version: str = None):
+        dep_list = self.dependencies
+        dep_list = filter(lambda d: d.artifact == artifact_id, dep_list)
+        if group_id:
+            dep_list = filter(lambda d: d.group == group_id, dep_list)
+        if version:
+            dep_list = filter(lambda d: d.version == version, dep_list)
+        dep_list = list(dep_list)
+        if dep_list:
+            return dep_list[0]
+        else:
+            return None
 
     def save(self, filename: str):
         xml_str = ET.tostring(self.project, encoding='unicode')
