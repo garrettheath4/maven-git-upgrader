@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+"""
+maven-git-updater
+
+Checks for updates to Maven dependencies in a project and creates git branches
+for each update to allow for isolated unit testing and easy integration.
+
+updater.py (the main script; this script)
+|
++-> Update (represents a single Maven dependency that needs to be updated)
+    |
+    +-> Branch (represents the Git branch that the update will be contained in)
+    |
+    +-> Pom (represents the Maven pom.xml file that needs to be modified)
+"""
 
 import sys
 import subprocess
@@ -38,11 +52,11 @@ def calculate_updates() -> List[Update]:
     :return: List of Update objects
     """
     log.info("Maven is checking for updates...")
-    completed = subprocess.run(
+    display_updates = subprocess.run(
         ['mvn', 'versions:display-dependency-updates'],
-        stdout=subprocess.PIPE)
+        stdout=subprocess.PIPE, check=True)
     log.info("Maven done. Processing updates...")
-    stdout = completed.stdout.decode('utf-8')
+    stdout = display_updates.stdout.decode('utf-8')
     lines = stdout.split('\n')
     upgrade_lines = filter(lambda l: l.startswith("[INFO] ") and " -> " in l,
                            lines)
