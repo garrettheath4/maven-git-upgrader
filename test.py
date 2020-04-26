@@ -33,7 +33,7 @@ class TestMaven(unittest.TestCase):
         artifact_tag = f"<artifactId>{artifact}</artifactId>"
         scalatest_dep_list = list(filter(
             lambda d: d.artifact == artifact, pom.dependencies))
-        self.assertEqual(len(scalatest_dep_list), 1)
+        self.assertEqual(1, len(scalatest_dep_list))
         scalatest_dep_list[0].set_version(new_version)
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
@@ -67,11 +67,50 @@ class TestMaven(unittest.TestCase):
         pom = Pom(input_filename)
         self.assertGreater(len(pom.dependencies), 0)
         artifact = "scala-library"
-        scalatest_dep_list = list(filter(
+        scalalib_dep_list = list(filter(
             lambda d: d.artifact == artifact, pom.dependencies))
-        self.assertEqual(len(scalatest_dep_list), 1)
-        scalatest_dep_list[0].set_version(new_version)
-        prop_name = scalatest_dep_list[0].prop_name
+        self.assertEqual(1, len(scalalib_dep_list))
+        scalalib_dep_list[0].set_version(new_version)
+        prop_name = scalalib_dep_list[0].prop_name
+        version_prop_tag = f"<{prop_name}>"
+        pom.save(output_filename)
+        self.assertTrue(os.path.isfile(output_filename))
+        with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
+            i_curr = "\n"
+            o_curr = i_curr
+            num_lines = 0
+            found_version_prop_tag = False
+            while i_curr and o_curr:
+                i_curr = i.readline()
+                o_curr = o.readline()
+                num_lines += 1
+                if version_prop_tag in o_curr:
+                    found_version_prop_tag = True
+                    self.assertIn(new_version, o_curr)
+                    self.assertNotIn(new_version, i_curr)
+                    self.assertNotEqual(i_curr, o_curr)
+                else:
+                    self.assertEqual(i_curr, o_curr)
+            self.assertTrue(found_version_prop_tag)
+            self.assertGreaterEqual(num_lines, 9)
+
+    def test_set_version_property_used_twice(self):
+        input_filename = "pom-unittest-in.xml"
+        output_filename = "pom-unittest-out.xml"
+        new_version = "7.7.7"
+        pom = Pom(input_filename)
+        self.assertGreater(len(pom.dependencies), 0)
+        artifact1 = "logback-classic"
+        artifact2 = "logback-core"
+        artifact1_dep_list = list(filter(
+            lambda d: d.artifact == artifact1, pom.dependencies))
+        self.assertEqual(1, len(artifact1_dep_list))
+        artifact1_dep_list[0].set_version(new_version)
+        artifact2_dep_list = list(filter(
+            lambda d: d.artifact == artifact2, pom.dependencies))
+        self.assertEqual(1, len(artifact2_dep_list))
+        self.assertEqual(new_version, artifact2_dep_list[0].version_xml.text)
+        prop_name = artifact1_dep_list[0].prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
