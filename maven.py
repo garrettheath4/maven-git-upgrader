@@ -31,8 +31,10 @@ class Dependency:
         self.version_xml: Optional[ET.Element] = \
             dependency_xml.find(M+"version", NS)
         if self.version_xml.text.startswith("${"):
-            prop_name = re.findall(r'\${([^}]+)}', self.version_xml.text)[0]
-            self.version_xml = properties_xml.find(M+prop_name, NS)
+            self.prop_name = re.findall(r'\${([^}]+)}', self.version_xml.text)[0]
+            self.version_xml = properties_xml.find(M+self.prop_name, NS)
+        else:
+            self.prop_name = None
 
     def set_version(self, version_number: str):
         self.version_xml.text = str(version_number)
@@ -47,7 +49,8 @@ class Pom:
         self._properties_xml = self.project.find(M+"properties", NS)
         self.dependencies: List[Dependency] = list(map(
             lambda d: Dependency(d, self._properties_xml),
-            filter(lambda x: x.tag == NSM+"dependency", self._dependencies_xml)))
+            filter(lambda x: x.tag == NSM+"dependency",
+                   self._dependencies_xml)))
 
     def save(self, filename: str):
         xml_str = ET.tostring(self.project, encoding='unicode')
@@ -62,9 +65,9 @@ class Pom:
             '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0' \
             ' http://maven.apache.org/maven-v4_0_0.xsd">'
         if xml_str.startswith(project_tag_too_wide):
-            xml_str = xml_str.replace(project_tag_too_wide, project_tag_two_lines, 1)
+            xml_str = xml_str.replace(project_tag_too_wide,
+                                      project_tag_two_lines, 1)
         if not xml_str.endswith('\n'):
             xml_str += '\n'
-        log.debug(xml_str[0:220])
         with open(filename, 'w') as output:
             output.write(xml_str)

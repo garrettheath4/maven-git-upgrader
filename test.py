@@ -1,12 +1,7 @@
-import logging
 import os.path
 import unittest
 
 from maven import Pom
-
-
-logging.basicConfig(level="DEBUG")
-log = logging.getLogger("test")
 
 
 class TestMaven(unittest.TestCase):
@@ -26,10 +21,9 @@ class TestMaven(unittest.TestCase):
                 o_curr = o.readline()
                 num_lines += 1
                 self.assertEqual(i_curr, o_curr)
-            log.debug("number of lines checked: " + str(num_lines))
-            self.assertGreater(num_lines, 1)
+            self.assertGreaterEqual(num_lines, 9)
 
-    def test_set_version(self):
+    def test_set_version_simple(self):
         input_filename = "pom-unittest-in.xml"
         output_filename = "pom-unittest-out.xml"
         new_version = "9.9.9"
@@ -46,6 +40,7 @@ class TestMaven(unittest.TestCase):
         with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
             i_curr = "\n"
             o_curr = i_curr
+            found_updated_version = False
             next_line_is_updated_version = False
             num_lines = 0
             while i_curr and o_curr:
@@ -57,12 +52,47 @@ class TestMaven(unittest.TestCase):
                     self.assertNotIn(new_version, i_curr)
                     self.assertNotEqual(i_curr, o_curr)
                     next_line_is_updated_version = False
+                    found_updated_version = True
                 else:
                     if artifact_tag in o_curr:
                         next_line_is_updated_version = True
                     self.assertEqual(i_curr, o_curr)
-            log.debug("number of lines checked: " + str(num_lines))
-            self.assertGreater(num_lines, 1)
+            self.assertTrue(found_updated_version)
+            self.assertGreaterEqual(num_lines, 9)
+
+    def test_set_version_property_used_once(self):
+        input_filename = "pom-unittest-in.xml"
+        output_filename = "pom-unittest-out.xml"
+        new_version = "8.8.8"
+        pom = Pom(input_filename)
+        self.assertGreater(len(pom.dependencies), 0)
+        artifact = "scala-library"
+        scalatest_dep_list = list(filter(
+            lambda d: d.artifact == artifact, pom.dependencies))
+        self.assertEqual(len(scalatest_dep_list), 1)
+        scalatest_dep_list[0].set_version(new_version)
+        prop_name = scalatest_dep_list[0].prop_name
+        version_prop_tag = f"<{prop_name}>"
+        pom.save(output_filename)
+        self.assertTrue(os.path.isfile(output_filename))
+        with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
+            i_curr = "\n"
+            o_curr = i_curr
+            num_lines = 0
+            found_version_prop_tag = False
+            while i_curr and o_curr:
+                i_curr = i.readline()
+                o_curr = o.readline()
+                num_lines += 1
+                if version_prop_tag in o_curr:
+                    found_version_prop_tag = True
+                    self.assertIn(new_version, o_curr)
+                    self.assertNotIn(new_version, i_curr)
+                    self.assertNotEqual(i_curr, o_curr)
+                else:
+                    self.assertEqual(i_curr, o_curr)
+            self.assertTrue(found_version_prop_tag)
+            self.assertGreaterEqual(num_lines, 9)
 
 
 if __name__ == '__main__':
