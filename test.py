@@ -212,6 +212,18 @@ class TestBranch(unittest.TestCase):
             self.assertNotEqual(0, num_lines)
         subprocess.run(['git', 'checkout', 'master'],
                        check=True, cwd=TestBranch.git_dir)
+        with open(TestBranch.pom_filename, 'r') as orig_pom, \
+                open(TestBranch.pom_path_in_git, 'r') as master_pom:
+            orig_curr = "\n"
+            master_curr = orig_curr
+            num_lines = 0
+            while orig_curr and master_curr:
+                orig_curr = orig_pom.readline()
+                master_curr = master_pom.readline()
+                num_lines += 1
+                self.assertEqual(orig_curr, master_curr)
+            self.assertEqual(orig_curr, master_curr)
+            self.assertNotEqual(0, num_lines)
         self._teardown()
 
     # TODO: test_branch_mock_switch_to_TWO
