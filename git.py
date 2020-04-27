@@ -22,6 +22,10 @@ class Branch:
                                 self._git_directory + "/"], check=True)
                 subprocess.run(['git', 'add', _pom_filename_to_copy],
                                check=True, cwd=self._git_directory)
+                subprocess.run(['git', 'config', 'user.email',
+                                "unittest@email.com"], cwd=self._git_directory)
+                subprocess.run(['git', 'config', 'user.name',
+                                "Unit Test"], cwd=self._git_directory)
                 subprocess.run(['git', 'commit', '-m', "Unit test commit"],
                                check=True, cwd=self._git_directory)
 

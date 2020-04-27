@@ -188,6 +188,8 @@ class TestBranch(unittest.TestCase):
         self.assertNotEqual(old_branch, new_branch)
         self._teardown()
 
+    # TODO: test_branch_mock_switch_to_TWO
+
     def _teardown(self):
         subprocess.run(['rm',
                         TestBranch.git_dir + "/" + TestBranch.pom_filename],
