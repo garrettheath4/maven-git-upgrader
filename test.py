@@ -137,7 +137,7 @@ class TestUpdate(unittest.TestCase):
     def test_update_line_classgraph(self):
         update_line = "[INFO]   io.github.classgraph:classgraph" \
                       " ..................... 4.8.71 -> 4.8.75"
-        update = Update(update_line, "pom-unittest-in.xml")
+        update = Update(update_line, pom_filename="pom-unittest-in.xml")
         self.assertTrue(update.parsed)
         self.assertEqual("io.github.classgraph", update.group)
         self.assertEqual("classgraph", update.artifact)
@@ -161,8 +161,9 @@ class TestBranch(unittest.TestCase):
         cwd1 = subprocess.run(
             ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
         self.assertTrue(str(cwd1))
-        branch = Branch(TestBranch.git_branch,
-                        TestBranch.git_dir, TestBranch.pom_filename)
+        branch = Branch(TestBranch.git_branch, based_on="master",
+                        _git_dir_to_make=TestBranch.git_dir,
+                        _pom_filename_to_copy=TestBranch.pom_filename)
         cwd2 = subprocess.run(
             ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
         self.assertEqual(cwd1, cwd2)
@@ -181,7 +182,7 @@ class TestBranch(unittest.TestCase):
             stdout=subprocess.PIPE, check=True,
             cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
         self.assertEqual("master", old_branch)
-        branch.switch_to()
+        branch.activate()
         new_branch = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             stdout=subprocess.PIPE, check=True,
@@ -192,7 +193,7 @@ class TestBranch(unittest.TestCase):
 
     def test_branch_mock_switch_and_commit(self):
         branch = self._setup_branch_repo()
-        branch.switch_to()
+        branch.activate()
         with open(TestBranch.pom_path_in_git, 'w') as f:
             f.write(TestBranch.pom_update_contents)
         subprocess.run(['git', 'add', TestBranch.pom_filename],

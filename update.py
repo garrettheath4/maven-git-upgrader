@@ -17,9 +17,12 @@ from maven import Pom
 
 
 class Update:
-    def __init__(self, update_line: str, pom_filename: str = "pom.xml", ):
-        self.parsed = False
+    def __init__(self, update_line: str, branch_to_update: str = "master",
+                 pom_filename: str = "pom.xml"):
         self.update_line = update_line
+        self.branch_to_update = branch_to_update
+        self._pom_filename = pom_filename
+        self.parsed = False
         if not update_line:
             return
         matches = re.findall(
@@ -32,8 +35,8 @@ class Update:
             self.artifact = artifact
             self.current = current_version
             self.latest = latest_version
-            self.branch = Branch(f"update-{artifact}")
-            self.pom = Pom(pom_filename)
+            self.branch = Branch(f"update-{artifact}", branch_to_update)
+            self.pom = Pom(self._pom_filename)
             self.pom_dependency = self.pom.get_dependency(
                 artifact_id=artifact, group_id=group, version=current_version)
 
