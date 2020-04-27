@@ -105,7 +105,7 @@ class TestMaven(unittest.TestCase):
         dep1.set_version(new_version)
         dep2 = pom.get_dependency(artifact2)
         self.assertIsNotNone(dep2)
-        self.assertEqual(new_version, dep2.version)
+        self.assertEqual(new_version, dep2.get_version())
         prop_name = dep1.prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)

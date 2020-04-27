@@ -35,7 +35,9 @@ class Dependency:
             self._version_xml = properties_xml.find(M + self.prop_name, NS)
         else:
             self.prop_name = None
-        self.version = self._version_xml.text
+
+    def get_version(self):
+        return self._version_xml.text
 
     def set_version(self, version_number: str):
         self._version_xml.text = str(version_number)
@@ -61,11 +63,14 @@ class Pom:
         if group_id:
             dep_list = filter(lambda d: d.group == group_id, dep_list)
         if version:
-            dep_list = filter(lambda d: d.version == version, dep_list)
+            dep_list = filter(lambda d: d.get_version() == version, dep_list)
         dep_list = list(dep_list)
         if dep_list:
             return dep_list[0]
         else:
+            log.warning("Pom.get_dependency(%s, %s, %s) found no matching"
+                        " dependency and is returning None",
+                        artifact_id, group_id, version)
             return None
 
     def save(self, filename: str):

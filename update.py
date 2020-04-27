@@ -34,6 +34,8 @@ class Update:
             self.latest = latest_version
             self.branch = Branch(f"update-{artifact}")
             self.pom = Pom()
+            self.pom_dependency = self.pom.get_dependency(
+                artifact_id=artifact, group_id=group, version=current_version)
 
     def __str__(self):
         if self.parsed:
