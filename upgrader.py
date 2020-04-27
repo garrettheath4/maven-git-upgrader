@@ -5,7 +5,7 @@ maven-git-updater
 Checks for updates to Maven dependencies in a project and creates git branches
 for each update to allow for isolated unit testing and easy integration.
 
-updater.py (the main script; this script)
+upgrader.py (the main script; this script)
 |
 +-> Update (represents a single Maven dependency that needs to be updated)
     |
@@ -25,7 +25,7 @@ from update import Update
 
 
 logging.basicConfig(level="DEBUG")
-log = logging.getLogger("updater")
+log = logging.getLogger("upgrader")
 
 
 def main():
