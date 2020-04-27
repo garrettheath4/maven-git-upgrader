@@ -2,6 +2,7 @@ import os.path
 import unittest
 
 from maven import Pom
+from update import Update
 
 
 class TestMaven(unittest.TestCase):
@@ -128,6 +129,22 @@ class TestMaven(unittest.TestCase):
                     self.assertEqual(i_curr, o_curr)
             self.assertTrue(found_version_prop_tag)
             self.assertGreaterEqual(num_lines, 9)
+
+
+class TestUpdate(unittest.TestCase):
+    def test_update_line_classgraph(self):
+        update_line = "[INFO]   io.github.classgraph:classgraph" \
+                      " ..................... 4.8.71 -> 4.8.75"
+        update = Update(update_line, "pom-unittest-in.xml")
+        self.assertTrue(update.parsed)
+        self.assertEqual("io.github.classgraph", update.group)
+        self.assertEqual("classgraph", update.artifact)
+        self.assertEqual("4.8.71", update.current)
+        self.assertEqual("4.8.75", update.latest)
+        self.assertEqual("update-classgraph", update.branch.name)
+        self.assertEqual("classgraph", update.pom_dependency.artifact)
+        self.assertEqual("io.github.classgraph", update.pom_dependency.group)
+        self.assertEqual("4.8.71", update.pom_dependency.get_version())
 
 
 if __name__ == '__main__':
