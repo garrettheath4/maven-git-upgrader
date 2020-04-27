@@ -150,9 +150,11 @@ class TestUpdate(unittest.TestCase):
 
 
 class TestBranch(unittest.TestCase):
-    git_dir = "unittest"
+    git_dir = "tmp"
     git_branch = "update-" + git_dir
     pom_filename = "pom-unittest-in.xml"
+    pom_path_in_git = git_dir + "/" + pom_filename
+    pom_update_contents = "Updated\nin\nnew\nbranch.\n"
 
     def _setup_branch_repo(self) -> Branch:
         self.assertFalse(TestBranch.git_dir.startswith("/"))
@@ -186,6 +188,30 @@ class TestBranch(unittest.TestCase):
             cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
         self.assertEqual(TestBranch.git_branch, new_branch)
         self.assertNotEqual(old_branch, new_branch)
+        self._teardown()
+
+    def test_branch_mock_switch_and_commit(self):
+        branch = self._setup_branch_repo()
+        branch.switch_to()
+        with open(TestBranch.pom_path_in_git, 'w') as f:
+            f.write(TestBranch.pom_update_contents)
+        subprocess.run(['git', 'add', TestBranch.pom_filename],
+                       check=True, cwd=TestBranch.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch"],
+                       check=True, cwd=TestBranch.git_dir)
+        with open(TestBranch.pom_filename, 'r') as orig_pom, \
+                open(TestBranch.pom_path_in_git, 'r') as new_pom:
+            orig_curr = "\n"
+            new_curr = orig_curr
+            num_lines = 0
+            while orig_curr and new_curr:
+                orig_curr = orig_pom.readline()
+                new_curr = new_pom.readline()
+                num_lines += 1
+                self.assertNotEqual(orig_curr, new_curr)
+            self.assertNotEqual(0, num_lines)
+        subprocess.run(['git', 'checkout', 'master'],
+                       check=True, cwd=TestBranch.git_dir)
         self._teardown()
 
     # TODO: test_branch_mock_switch_to_TWO
