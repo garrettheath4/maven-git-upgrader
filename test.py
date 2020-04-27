@@ -7,6 +7,37 @@ from maven import Pom
 from update import Update
 
 
+class FileHelper:
+    @staticmethod
+    def assert_files_equal(filename_a: str, filename_b: str,
+                           test_case: unittest.TestCase):
+        with open(filename_a, 'r') as file_a, open(filename_b, 'r') as file_b:
+            a_curr = "\n"
+            b_curr = a_curr
+            num_lines = 0
+            while a_curr and b_curr:
+                a_curr = file_a.readline()
+                b_curr = file_b.readline()
+                num_lines += 1
+                test_case.assertEqual(a_curr, b_curr)
+            test_case.assertEqual(a_curr, b_curr)
+            test_case.assertGreater(num_lines, 1)
+
+    @staticmethod
+    def assert_files_not_equal(filename_a: str, filename_b: str,
+                               test_case: unittest.TestCase):
+        with open(filename_a, 'r') as file_a, open(filename_b, 'r') as file_b:
+            a_curr = "\n"
+            b_curr = a_curr
+            while a_curr and b_curr:
+                a_curr = file_a.readline()
+                b_curr = file_b.readline()
+                if a_curr != b_curr:
+                    return
+            test_case.fail(
+                f"{filename_a} and {filename_b} have the same contents")
+
+
 class TestMaven(unittest.TestCase):
     def test_pom(self):
         input_filename = "pom-unittest-in.xml"
@@ -15,16 +46,7 @@ class TestMaven(unittest.TestCase):
         self.assertGreater(len(pom.dependencies), 0)
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
-        with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
-            i_curr = "\n"
-            o_curr = i_curr
-            num_lines = 0
-            while i_curr and o_curr:
-                i_curr = i.readline()
-                o_curr = o.readline()
-                num_lines += 1
-                self.assertEqual(i_curr, o_curr)
-            self.assertGreaterEqual(num_lines, 9)
+        FileHelper.assert_files_equal(input_filename, output_filename, self)
 
     def test_set_version_simple(self):
         input_filename = "pom-unittest-in.xml"
@@ -152,9 +174,11 @@ class TestUpdate(unittest.TestCase):
 class TestBranch(unittest.TestCase):
     git_dir = "tmp"
     git_branch = "update-" + git_dir
+    git_branch_b = git_branch + "-a"
     pom_filename = "pom-unittest-in.xml"
     pom_path_in_git = git_dir + "/" + pom_filename
-    pom_update_contents = "Updated\nin\nnew\nbranch.\n"
+    pom_update_contents_a = "Updated\nin\nnew\nbranch A.\n"
+    pom_update_contents_b = "Updated\nin\nnew\nbranch B.\n"
 
     def _setup_branch_repo(self) -> Branch:
         self.assertFalse(TestBranch.git_dir.startswith("/"))
@@ -192,42 +216,38 @@ class TestBranch(unittest.TestCase):
         self._teardown()
 
     def test_branch_mock_switch_and_commit(self):
-        branch = self._setup_branch_repo()
-        branch.activate()
+        self._setup_branch_repo().activate()
         with open(TestBranch.pom_path_in_git, 'w') as f:
-            f.write(TestBranch.pom_update_contents)
+            f.write(TestBranch.pom_update_contents_a)
         subprocess.run(['git', 'add', TestBranch.pom_filename],
                        check=True, cwd=TestBranch.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch"],
                        check=True, cwd=TestBranch.git_dir)
-        with open(TestBranch.pom_filename, 'r') as orig_pom, \
-                open(TestBranch.pom_path_in_git, 'r') as new_pom:
-            orig_curr = "\n"
-            new_curr = orig_curr
-            num_lines = 0
-            while orig_curr and new_curr:
-                orig_curr = orig_pom.readline()
-                new_curr = new_pom.readline()
-                num_lines += 1
-                self.assertNotEqual(orig_curr, new_curr)
-            self.assertNotEqual(0, num_lines)
+        FileHelper.assert_files_not_equal(TestBranch.pom_filename,
+                                          TestBranch.pom_path_in_git,
+                                          self)
         subprocess.run(['git', 'checkout', 'master'],
                        check=True, cwd=TestBranch.git_dir)
-        with open(TestBranch.pom_filename, 'r') as orig_pom, \
-                open(TestBranch.pom_path_in_git, 'r') as master_pom:
-            orig_curr = "\n"
-            master_curr = orig_curr
-            num_lines = 0
-            while orig_curr and master_curr:
-                orig_curr = orig_pom.readline()
-                master_curr = master_pom.readline()
-                num_lines += 1
-                self.assertEqual(orig_curr, master_curr)
-            self.assertEqual(orig_curr, master_curr)
-            self.assertNotEqual(0, num_lines)
+        FileHelper.assert_files_equal(TestBranch.pom_filename,
+                                      TestBranch.pom_path_in_git, self)
         self._teardown()
 
     # TODO: test_branch_mock_switch_to_TWO
+    # def test_branch_mock_switch_commit_switch(self):
+    #     branch_a = self._setup_branch_repo()
+    #     branch_a.activate()
+    #     with open(TestBranch.pom_path_in_git, 'w') as f:
+    #         f.write(TestBranch.pom_update_contents_a)
+    #     subprocess.run(['git', 'add', TestBranch.pom_filename],
+    #                    check=True, cwd=TestBranch.git_dir)
+    #     subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
+    #                    check=True, cwd=TestBranch.git_dir)
+    #     branch_b = Branch(TestBranch.git_branch_b, based_on="master",
+    #                       _git_dir_to_make=TestBranch.git_dir,
+    #                       _pom_filename_to_copy=TestBranch.pom_filename)
+    #     FileHelper.assert_files_equal(TestBranch.pom_filename,
+    #                                   TestBranch.pom_path_in_git, self)
+    #     self._teardown()
 
     def _teardown(self):
         subprocess.run(['rm',
