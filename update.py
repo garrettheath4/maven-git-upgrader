@@ -17,7 +17,7 @@ from maven import Pom
 
 
 class Update:
-    def __init__(self, update_line: str, pom_filename: str = "pom.xml"):
+    def __init__(self, update_line: str, pom_filename: str = "pom.xml", ):
         self.parsed = False
         self.update_line = update_line
         if not update_line:

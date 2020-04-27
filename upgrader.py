@@ -35,7 +35,7 @@ def main():
         print(u)
 
 
-def calculate_updates() -> List[Update]:
+def calculate_updates(git_directory: str = None) -> List[Update]:
     """
     Runs `mvn versions:display-dependency-updates` and parses the output to
     return a list of Update objects representing the Maven project's
@@ -56,7 +56,7 @@ def calculate_updates() -> List[Update]:
     log.info("Maven is checking for updates...")
     display_updates = subprocess.run(
         ['mvn', 'versions:display-dependency-updates'],
-        stdout=subprocess.PIPE, check=True)
+        stdout=subprocess.PIPE, check=True, cwd=git_directory)
     log.info("Maven done. Processing updates...")
     stdout = display_updates.stdout.decode('utf-8')
     lines = stdout.split('\n')

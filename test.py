@@ -1,6 +1,8 @@
 import os.path
+import subprocess
 import unittest
 
+from git import Branch
 from maven import Pom
 from update import Update
 
@@ -145,6 +147,53 @@ class TestUpdate(unittest.TestCase):
         self.assertEqual("classgraph", update.pom_dependency.artifact)
         self.assertEqual("io.github.classgraph", update.pom_dependency.group)
         self.assertEqual("4.8.71", update.pom_dependency.get_version())
+
+
+class TestBranch(unittest.TestCase):
+    git_dir = "unittest"
+    git_branch = "update-" + git_dir
+    pom_filename = "pom-unittest-in.xml"
+
+    def _setup_branch_repo(self) -> Branch:
+        self.assertFalse(TestBranch.git_dir.startswith("/"))
+        cwd1 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        self.assertTrue(str(cwd1))
+        branch = Branch(TestBranch.git_branch,
+                        TestBranch.git_dir, TestBranch.pom_filename)
+        cwd2 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        self.assertEqual(cwd1, cwd2)
+        self.assertTrue(os.path.isdir(TestBranch.git_dir))
+        self.assertTrue(os.path.isdir(TestBranch.git_dir + "/.git"))
+        return branch
+
+    def test_branch_mock_init(self):
+        self._setup_branch_repo()
+        self._teardown()
+
+    def test_branch_mock_switch_to(self):
+        branch = self._setup_branch_repo()
+        old_branch = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=subprocess.PIPE, check=True,
+            cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
+        self.assertEqual("master", old_branch)
+        branch.switch_to()
+        new_branch = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=subprocess.PIPE, check=True,
+            cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
+        self.assertEqual(TestBranch.git_branch, new_branch)
+        self.assertNotEqual(old_branch, new_branch)
+        self._teardown()
+
+    def _teardown(self):
+        subprocess.run(['rm',
+                        TestBranch.git_dir + "/" + TestBranch.pom_filename],
+                       check=True)
+        subprocess.run(['rm', '-r', TestBranch.git_dir + "/.git"], check=True)
+        subprocess.run(['rmdir', TestBranch.git_dir], check=True)
 
 
 if __name__ == '__main__':
