@@ -8,6 +8,7 @@ from update import Update
 
 
 class FileHelper:
+    # for TestBranch
     git_dir = "tmp"
     git_branch = "update-" + git_dir
     git_branch_b = git_branch + "-a"
@@ -15,6 +16,10 @@ class FileHelper:
     pom_path_in_git = git_dir + "/" + pom_filename
     pom_update_contents_a = "Updated\nin\nnew\nbranch A.\n"
     pom_update_contents_b = "Updated\nin\nnew\nbranch B.\n"
+
+    # for TestUpdate
+    classgraph_update_line = "[INFO]   io.github.classgraph:classgraph " \
+                             "..................... 4.8.71 -> 4.8.75"
 
     @staticmethod
     def assert_files_equal(filename_a: str, filename_b: str,
@@ -46,8 +51,9 @@ class FileHelper:
                 f"{filename_a} and {filename_b} have the same contents")
 
     @staticmethod
-    def _setup_branch_repo(test_case: unittest.TestCase) -> Branch:
-        test_case.assertFalse(FileHelper.git_dir.startswith("/"))
+    def setup_branch_repo(test_case: unittest.TestCase) -> Branch:
+        test_case.assertFalse("/" in FileHelper.git_dir
+                              or "." in FileHelper.git_dir)
         cwd1 = subprocess.run(
             ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
         test_case.assertTrue(str(cwd1))
@@ -59,10 +65,31 @@ class FileHelper:
         test_case.assertEqual(cwd1, cwd2)
         test_case.assertTrue(os.path.isdir(FileHelper.git_dir))
         test_case.assertTrue(os.path.isdir(FileHelper.git_dir + "/.git"))
+        test_case.assertTrue(os.path.isfile(FileHelper.pom_path_in_git))
         return branch
 
     @staticmethod
-    def _teardown():
+    def setup_update_repo(test_case: unittest.TestCase) -> Update:
+        test_case.assertFalse("/" in FileHelper.git_dir
+                              or "." in FileHelper.git_dir)
+        cwd1 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        test_case.assertTrue(str(cwd1))
+        update = Update(FileHelper.classgraph_update_line,
+                        branch_to_update_from="master",
+                        pom_filename=FileHelper.pom_filename,
+                        _git_dir_to_make=FileHelper.git_dir,
+                        _pom_filename_to_copy=FileHelper.pom_filename)
+        cwd2 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        test_case.assertEqual(cwd1, cwd2)
+        test_case.assertTrue(os.path.isdir(FileHelper.git_dir))
+        test_case.assertTrue(os.path.isdir(FileHelper.git_dir + "/.git"))
+        test_case.assertTrue(os.path.isfile(FileHelper.pom_path_in_git))
+        return update
+
+    @staticmethod
+    def teardown():
         subprocess.run(['rm',
                         FileHelper.git_dir + "/" + FileHelper.pom_filename],
                        check=True)
@@ -189,11 +216,11 @@ class TestMaven(unittest.TestCase):
 
 class TestBranch(unittest.TestCase):
     def test_branch_mock_init(self):
-        FileHelper._setup_branch_repo(self)
-        FileHelper._teardown()
+        FileHelper.setup_branch_repo(self)
+        FileHelper.teardown()
 
     def test_branch_mock_switch_to(self):
-        branch = FileHelper._setup_branch_repo(self)
+        branch = FileHelper.setup_branch_repo(self)
         old_branch = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             stdout=subprocess.PIPE, check=True,
@@ -206,10 +233,10 @@ class TestBranch(unittest.TestCase):
             cwd=FileHelper.git_dir).stdout.decode('utf-8').strip()
         self.assertEqual(FileHelper.git_branch, new_branch)
         self.assertNotEqual(old_branch, new_branch)
-        FileHelper._teardown()
+        FileHelper.teardown()
 
     def test_branch_mock_switch_and_commit(self):
-        FileHelper._setup_branch_repo(self).activate()
+        FileHelper.setup_branch_repo(self).activate()
         with open(FileHelper.pom_path_in_git, 'w') as f:
             f.write(FileHelper.pom_update_contents_a)
         subprocess.run(['git', 'add', FileHelper.pom_filename],
@@ -223,10 +250,10 @@ class TestBranch(unittest.TestCase):
                        check=True, cwd=FileHelper.git_dir)
         FileHelper.assert_files_equal(FileHelper.pom_filename,
                                       FileHelper.pom_path_in_git, self)
-        FileHelper._teardown()
+        FileHelper.teardown()
 
     def test_branch_mock_switch_commit_switch(self):
-        branch_a = FileHelper._setup_branch_repo(self)
+        branch_a = FileHelper.setup_branch_repo(self)
         branch_a.activate()
         with open(FileHelper.pom_path_in_git, 'w') as f:
             f.write(FileHelper.pom_update_contents_a)
@@ -244,14 +271,13 @@ class TestBranch(unittest.TestCase):
             f.write(FileHelper.pom_update_contents_b)
         FileHelper.assert_files_not_equal(FileHelper.pom_filename,
                                           FileHelper.pom_path_in_git, self)
-        FileHelper._teardown()
+        FileHelper.teardown()
 
 
 class TestUpdate(unittest.TestCase):
     def test_update_line_classgraph(self):
-        update_line = "[INFO]   io.github.classgraph:classgraph" \
-                      " ..................... 4.8.71 -> 4.8.75"
-        update = Update(update_line, pom_filename="pom-unittest-in.xml")
+        update = Update(FileHelper.classgraph_update_line,
+                        pom_filename=FileHelper.pom_filename)
         self.assertTrue(update.parsed)
         self.assertEqual("io.github.classgraph", update.group)
         self.assertEqual("classgraph", update.artifact)

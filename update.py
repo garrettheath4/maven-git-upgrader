@@ -18,7 +18,8 @@ from maven import Pom
 
 class Update:
     def __init__(self, update_line: str, branch_to_update_from: str = "master",
-                 pom_filename: str = "pom.xml"):
+                 pom_filename: str = "pom.xml", _git_dir_to_make: str = None,
+                 _pom_filename_to_copy: str = None):
         self.update_line = update_line
         self.branch_to_update_from = branch_to_update_from
         self._pom_filename = pom_filename
@@ -42,7 +43,9 @@ class Update:
             self.artifact = artifact
             self.current = current_version
             self.latest = latest_version
-            self.branch = Branch(f"update-{artifact}", branch_to_update_from)
+            self.branch = Branch(f"update-{artifact}", branch_to_update_from,
+                                 _git_dir_to_make=_git_dir_to_make,
+                                 _pom_filename_to_copy=_pom_filename_to_copy)
             self.pom_dependency = self._pom.get_dependency(
                 artifact_id=artifact, group_id=group, version=current_version)
 
