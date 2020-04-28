@@ -22,6 +22,29 @@ class FileHelper:
                              "..................... 4.8.71 -> 4.8.75"
 
     @staticmethod
+    def assert_file_contains(filename: str, search_string: str,
+                             test_case: unittest.TestCase):
+        with open(filename, 'r') as file:
+            current_line = "\n"
+            while current_line:
+                current_line = file.readline()
+                if search_string in current_line:
+                    return
+            test_case.fail(f"{search_string} not found in {filename}")
+
+    @staticmethod
+    def assert_file_does_not_contain(filename: str, search_string: str,
+                                     test_case: unittest.TestCase):
+        with open(filename, 'r') as file:
+            current_line = "\n"
+            num_lines = 0
+            while current_line:
+                current_line = file.readline()
+                num_lines += 1
+                test_case.assertNotIn(search_string, current_line)
+            test_case.assertGreater(num_lines, 1)
+
+    @staticmethod
     def assert_files_equal(filename_a: str, filename_b: str,
                            test_case: unittest.TestCase):
         with open(filename_a, 'r') as file_a, open(filename_b, 'r') as file_b:
@@ -33,7 +56,6 @@ class FileHelper:
                 b_curr = file_b.readline()
                 num_lines += 1
                 test_case.assertEqual(a_curr, b_curr)
-            test_case.assertEqual(a_curr, b_curr)
             test_case.assertGreater(num_lines, 1)
 
     @staticmethod
@@ -118,7 +140,7 @@ class TestMaven(unittest.TestCase):
     def test_set_version_simple(self):
         input_filename = "pom-unittest-in.xml"
         output_filename = "pom-unittest-out.xml"
-        new_version = "9.9.9"
+        new_version = "999.999.999"
         pom = Pom(input_filename)
         self.assertGreater(len(pom.dependencies), 0)
         artifact = "scalatest_2.11"
@@ -154,7 +176,7 @@ class TestMaven(unittest.TestCase):
     def test_set_version_property_used_once(self):
         input_filename = "pom-unittest-in.xml"
         output_filename = "pom-unittest-out.xml"
-        new_version = "8.8.8"
+        new_version = "888.888.888"
         pom = Pom(input_filename)
         self.assertGreater(len(pom.dependencies), 0)
         artifact = "scala-library"
@@ -187,7 +209,7 @@ class TestMaven(unittest.TestCase):
     def test_set_version_property_used_twice(self):
         input_filename = "pom-unittest-in.xml"
         output_filename = "pom-unittest-out.xml"
-        new_version = "7.7.7"
+        new_version = "777.777.777"
         pom = Pom(input_filename)
         self.assertGreater(len(pom.dependencies), 0)
         artifact1 = "logback-classic"
