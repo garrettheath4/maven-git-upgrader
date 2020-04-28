@@ -20,10 +20,14 @@ class FileHelper:
     # for TestUpdate
     classgraph_version_old = "4.8.71"
     classgraph_version_new = "4.8.75"
-    classgraph_update_line = f"[INFO]   io.github.classgraph:classgraph" \
-                             f" ....................." \
-                             f" {classgraph_version_old}" \
-                             f" -> {classgraph_version_new}"
+    classgraph_update_line = \
+        "[INFO]   io.github.classgraph:classgraph ....................." \
+        f" {classgraph_version_old} -> {classgraph_version_new}"
+    fusion_version_old = "6.3.3"
+    fusion_version_new = "6.3.4"
+    fusion_core_update_line = \
+        "[INFO]   us.catalist.fusion:fusion-core ........................" \
+        f" {fusion_version_old} -> {fusion_version_new}"
 
     @staticmethod
     def assert_file_contains(filename: str, search_string: str,
@@ -82,9 +86,10 @@ class FileHelper:
                                 test_case: unittest.TestCase,
                                 skip_old_text_not_in_new_file: bool = False):
         test_case.assertTrue(os.path.isfile(old_filename))
+        test_case.assertTrue(os.path.isfile(new_filename))
+        FileHelper.assert_files_not_equal(old_filename, new_filename, test_case)
         FileHelper.assert_file_contains(old_filename, old_search_text, test_case)
         FileHelper.assert_file_does_not_contain(old_filename, new_search_text, test_case)
-        test_case.assertTrue(os.path.isfile(new_filename))
         FileHelper.assert_file_contains(new_filename, new_search_text, test_case)
         if not skip_old_text_not_in_new_file:
             FileHelper.assert_file_does_not_contain(new_filename,
@@ -363,8 +368,6 @@ class TestUpdate(unittest.TestCase):
                                            FileHelper.pom_path_in_git,
                                            FileHelper.classgraph_version_new,
                                            self)
-        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
-                                          FileHelper.pom_path_in_git, self)
         subprocess.run(['git', 'add', FileHelper.pom_filename],
                        check=True, cwd=FileHelper.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
@@ -372,13 +375,30 @@ class TestUpdate(unittest.TestCase):
         FileHelper.teardown()
 
     def test_update_sandbox_apply_two(self):
-        update: Update = FileHelper.setup_update_repo(self)
-        update.apply()
-        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
-                                          FileHelper.pom_path_in_git, self)
+        update_a: Update = FileHelper.setup_update_repo(self)
+        update_a.apply()
         subprocess.run(['git', 'add', FileHelper.pom_filename],
                        check=True, cwd=FileHelper.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
+                       check=True, cwd=FileHelper.git_dir)
+        update_b = Update(FileHelper.fusion_core_update_line,
+                          branch_to_update_from="master",
+                          pom_path=FileHelper.pom_path_in_git,
+                          _git_dir_to_make=FileHelper.git_dir,
+                          _pom_filename_to_copy=FileHelper.pom_filename)
+        update_b.apply()
+        FileHelper.basic_file_update_check(FileHelper.pom_filename,
+                                           FileHelper.fusion_version_old,
+                                           FileHelper.pom_path_in_git,
+                                           FileHelper.fusion_version_new,
+                                           self)
+        FileHelper.assert_file_contains(FileHelper.pom_path_in_git,
+                                        FileHelper.classgraph_version_old, self)
+        FileHelper.assert_file_does_not_contain(
+            FileHelper.pom_path_in_git, FileHelper.classgraph_version_new, self)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch B"],
                        check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
