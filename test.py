@@ -90,6 +90,11 @@ class FileHelper:
 
     @staticmethod
     def teardown():
+        # check for uncommitted changes, just in case
+        subprocess.run(['git', 'update-index', '--refresh'],
+                       cwd=FileHelper.git_dir)
+        subprocess.run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
+                       check=True, cwd=FileHelper.git_dir)
         subprocess.run(['rm',
                         FileHelper.git_dir + "/" + FileHelper.pom_filename],
                        check=True)
@@ -269,6 +274,10 @@ class TestBranch(unittest.TestCase):
                                       FileHelper.pom_path_in_git, self)
         with open(FileHelper.pom_path_in_git, 'w') as f:
             f.write(FileHelper.pom_update_contents_b)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch B"],
+                       check=True, cwd=FileHelper.git_dir)
         FileHelper.assert_files_not_equal(FileHelper.pom_filename,
                                           FileHelper.pom_path_in_git, self)
         FileHelper.teardown()
