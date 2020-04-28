@@ -155,22 +155,6 @@ class TestMaven(unittest.TestCase):
             self.assertGreaterEqual(num_lines, 9)
 
 
-class TestUpdate(unittest.TestCase):
-    def test_update_line_classgraph(self):
-        update_line = "[INFO]   io.github.classgraph:classgraph" \
-                      " ..................... 4.8.71 -> 4.8.75"
-        update = Update(update_line, pom_filename="pom-unittest-in.xml")
-        self.assertTrue(update.parsed)
-        self.assertEqual("io.github.classgraph", update.group)
-        self.assertEqual("classgraph", update.artifact)
-        self.assertEqual("4.8.71", update.current)
-        self.assertEqual("4.8.75", update.latest)
-        self.assertEqual("update-classgraph", update.branch.name)
-        self.assertEqual("classgraph", update.pom_dependency.artifact)
-        self.assertEqual("io.github.classgraph", update.pom_dependency.group)
-        self.assertEqual("4.8.71", update.pom_dependency.get_version())
-
-
 class TestBranch(unittest.TestCase):
     git_dir = "tmp"
     git_branch = "update-" + git_dir
@@ -260,6 +244,22 @@ class TestBranch(unittest.TestCase):
         FileHelper.assert_files_not_equal(TestBranch.pom_filename,
                                           TestBranch.pom_path_in_git, self)
         self._teardown()
+
+
+class TestUpdate(unittest.TestCase):
+    def test_update_line_classgraph(self):
+        update_line = "[INFO]   io.github.classgraph:classgraph" \
+                      " ..................... 4.8.71 -> 4.8.75"
+        update = Update(update_line, pom_filename="pom-unittest-in.xml")
+        self.assertTrue(update.parsed)
+        self.assertEqual("io.github.classgraph", update.group)
+        self.assertEqual("classgraph", update.artifact)
+        self.assertEqual("4.8.71", update.current)
+        self.assertEqual("4.8.75", update.latest)
+        self.assertEqual("update-classgraph", update.branch.name)
+        self.assertEqual("classgraph", update.pom_dependency.artifact)
+        self.assertEqual("io.github.classgraph", update.pom_dependency.group)
+        self.assertEqual("4.8.71", update.pom_dependency.get_version())
 
 
 if __name__ == '__main__':

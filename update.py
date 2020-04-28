@@ -17,12 +17,19 @@ from maven import Pom
 
 
 class Update:
-    def __init__(self, update_line: str, branch_to_update: str = "master",
+    def __init__(self, update_line: str, branch_to_update_from: str = "master",
                  pom_filename: str = "pom.xml"):
         self.update_line = update_line
-        self.branch_to_update = branch_to_update
+        self.branch_to_update_from = branch_to_update_from
         self._pom_filename = pom_filename
         self.parsed = False
+        self._pom = Pom(self._pom_filename)
+        self.group = None
+        self.artifact = None
+        self.current = None
+        self.latest = None
+        self.branch = None
+        self.pom_dependency = None
         if not update_line:
             return
         matches = re.findall(
@@ -35,10 +42,22 @@ class Update:
             self.artifact = artifact
             self.current = current_version
             self.latest = latest_version
-            self.branch = Branch(f"update-{artifact}", branch_to_update)
-            self.pom = Pom(self._pom_filename)
-            self.pom_dependency = self.pom.get_dependency(
+            self.branch = Branch(f"update-{artifact}", branch_to_update_from)
+            self.pom_dependency = self._pom.get_dependency(
                 artifact_id=artifact, group_id=group, version=current_version)
+
+    def apply(self):
+        if not self.parsed:
+            raise RuntimeError("Unable to apply Update because the provided"
+                               " update line was unable to be parsed: "
+                               + str(self.update_line))
+        if not self.pom_dependency:
+            raise RuntimeError("Unable to locate POM dependency the given"
+                               " update line refers to: "
+                               + str(self.update_line))
+        self.branch.activate()
+        self.pom_dependency.set_version(self.latest)
+        self._pom.save(self._pom_filename)
 
     def __str__(self):
         if self.parsed:
