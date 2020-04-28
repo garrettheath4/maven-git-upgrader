@@ -8,6 +8,14 @@ from update import Update
 
 
 class FileHelper:
+    git_dir = "tmp"
+    git_branch = "update-" + git_dir
+    git_branch_b = git_branch + "-a"
+    pom_filename = "pom-unittest-in.xml"
+    pom_path_in_git = git_dir + "/" + pom_filename
+    pom_update_contents_a = "Updated\nin\nnew\nbranch A.\n"
+    pom_update_contents_b = "Updated\nin\nnew\nbranch B.\n"
+
     @staticmethod
     def assert_files_equal(filename_a: str, filename_b: str,
                            test_case: unittest.TestCase):
@@ -36,6 +44,30 @@ class FileHelper:
                     return
             test_case.fail(
                 f"{filename_a} and {filename_b} have the same contents")
+
+    @staticmethod
+    def _setup_branch_repo(test_case: unittest.TestCase) -> Branch:
+        test_case.assertFalse(FileHelper.git_dir.startswith("/"))
+        cwd1 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        test_case.assertTrue(str(cwd1))
+        branch = Branch(FileHelper.git_branch, based_on="master",
+                        _git_dir_to_make=FileHelper.git_dir,
+                        _pom_filename_to_copy=FileHelper.pom_filename)
+        cwd2 = subprocess.run(
+            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        test_case.assertEqual(cwd1, cwd2)
+        test_case.assertTrue(os.path.isdir(FileHelper.git_dir))
+        test_case.assertTrue(os.path.isdir(FileHelper.git_dir + "/.git"))
+        return branch
+
+    @staticmethod
+    def _teardown():
+        subprocess.run(['rm',
+                        FileHelper.git_dir + "/" + FileHelper.pom_filename],
+                       check=True)
+        subprocess.run(['rm', '-r', FileHelper.git_dir + "/.git"], check=True)
+        subprocess.run(['rmdir', FileHelper.git_dir], check=True)
 
 
 class TestMaven(unittest.TestCase):
@@ -156,94 +188,63 @@ class TestMaven(unittest.TestCase):
 
 
 class TestBranch(unittest.TestCase):
-    git_dir = "tmp"
-    git_branch = "update-" + git_dir
-    git_branch_b = git_branch + "-a"
-    pom_filename = "pom-unittest-in.xml"
-    pom_path_in_git = git_dir + "/" + pom_filename
-    pom_update_contents_a = "Updated\nin\nnew\nbranch A.\n"
-    pom_update_contents_b = "Updated\nin\nnew\nbranch B.\n"
-
-    def _setup_branch_repo(self) -> Branch:
-        self.assertFalse(TestBranch.git_dir.startswith("/"))
-        cwd1 = subprocess.run(
-            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-        self.assertTrue(str(cwd1))
-        branch = Branch(TestBranch.git_branch, based_on="master",
-                        _git_dir_to_make=TestBranch.git_dir,
-                        _pom_filename_to_copy=TestBranch.pom_filename)
-        cwd2 = subprocess.run(
-            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-        self.assertEqual(cwd1, cwd2)
-        self.assertTrue(os.path.isdir(TestBranch.git_dir))
-        self.assertTrue(os.path.isdir(TestBranch.git_dir + "/.git"))
-        return branch
-
-    @staticmethod
-    def _teardown():
-        subprocess.run(['rm',
-                        TestBranch.git_dir + "/" + TestBranch.pom_filename],
-                       check=True)
-        subprocess.run(['rm', '-r', TestBranch.git_dir + "/.git"], check=True)
-        subprocess.run(['rmdir', TestBranch.git_dir], check=True)
-
     def test_branch_mock_init(self):
-        self._setup_branch_repo()
-        self._teardown()
+        FileHelper._setup_branch_repo(self)
+        FileHelper._teardown()
 
     def test_branch_mock_switch_to(self):
-        branch = self._setup_branch_repo()
+        branch = FileHelper._setup_branch_repo(self)
         old_branch = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             stdout=subprocess.PIPE, check=True,
-            cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
+            cwd=FileHelper.git_dir).stdout.decode('utf-8').strip()
         self.assertEqual("master", old_branch)
         branch.activate()
         new_branch = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             stdout=subprocess.PIPE, check=True,
-            cwd=TestBranch.git_dir).stdout.decode('utf-8').strip()
-        self.assertEqual(TestBranch.git_branch, new_branch)
+            cwd=FileHelper.git_dir).stdout.decode('utf-8').strip()
+        self.assertEqual(FileHelper.git_branch, new_branch)
         self.assertNotEqual(old_branch, new_branch)
-        self._teardown()
+        FileHelper._teardown()
 
     def test_branch_mock_switch_and_commit(self):
-        self._setup_branch_repo().activate()
-        with open(TestBranch.pom_path_in_git, 'w') as f:
-            f.write(TestBranch.pom_update_contents_a)
-        subprocess.run(['git', 'add', TestBranch.pom_filename],
-                       check=True, cwd=TestBranch.git_dir)
+        FileHelper._setup_branch_repo(self).activate()
+        with open(FileHelper.pom_path_in_git, 'w') as f:
+            f.write(FileHelper.pom_update_contents_a)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch"],
-                       check=True, cwd=TestBranch.git_dir)
-        FileHelper.assert_files_not_equal(TestBranch.pom_filename,
-                                          TestBranch.pom_path_in_git,
+                       check=True, cwd=FileHelper.git_dir)
+        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
+                                          FileHelper.pom_path_in_git,
                                           self)
         subprocess.run(['git', 'checkout', 'master'],
-                       check=True, cwd=TestBranch.git_dir)
-        FileHelper.assert_files_equal(TestBranch.pom_filename,
-                                      TestBranch.pom_path_in_git, self)
-        self._teardown()
+                       check=True, cwd=FileHelper.git_dir)
+        FileHelper.assert_files_equal(FileHelper.pom_filename,
+                                      FileHelper.pom_path_in_git, self)
+        FileHelper._teardown()
 
     def test_branch_mock_switch_commit_switch(self):
-        branch_a = self._setup_branch_repo()
+        branch_a = FileHelper._setup_branch_repo(self)
         branch_a.activate()
-        with open(TestBranch.pom_path_in_git, 'w') as f:
-            f.write(TestBranch.pom_update_contents_a)
-        subprocess.run(['git', 'add', TestBranch.pom_filename],
-                       check=True, cwd=TestBranch.git_dir)
+        with open(FileHelper.pom_path_in_git, 'w') as f:
+            f.write(FileHelper.pom_update_contents_a)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
-                       check=True, cwd=TestBranch.git_dir)
-        branch_b = Branch(TestBranch.git_branch_b, based_on="master",
-                          _git_dir_to_make=TestBranch.git_dir,
-                          _pom_filename_to_copy=TestBranch.pom_filename)
+                       check=True, cwd=FileHelper.git_dir)
+        branch_b = Branch(FileHelper.git_branch_b, based_on="master",
+                          _git_dir_to_make=FileHelper.git_dir,
+                          _pom_filename_to_copy=FileHelper.pom_filename)
         branch_b.activate()
-        FileHelper.assert_files_equal(TestBranch.pom_filename,
-                                      TestBranch.pom_path_in_git, self)
-        with open(TestBranch.pom_path_in_git, 'w') as f:
-            f.write(TestBranch.pom_update_contents_b)
-        FileHelper.assert_files_not_equal(TestBranch.pom_filename,
-                                          TestBranch.pom_path_in_git, self)
-        self._teardown()
+        FileHelper.assert_files_equal(FileHelper.pom_filename,
+                                      FileHelper.pom_path_in_git, self)
+        with open(FileHelper.pom_path_in_git, 'w') as f:
+            f.write(FileHelper.pom_update_contents_b)
+        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
+                                          FileHelper.pom_path_in_git, self)
+        FileHelper._teardown()
 
 
 class TestUpdate(unittest.TestCase):
