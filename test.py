@@ -221,7 +221,8 @@ class TestMaven(unittest.TestCase):
 
 class TestBranch(unittest.TestCase):
     def test_branch_mock_init(self):
-        FileHelper.setup_branch_repo(self)
+        branch: Branch = FileHelper.setup_branch_repo(self)
+        self.assertEqual(type(branch), Branch)
         FileHelper.teardown()
 
     def test_branch_mock_switch_to(self):
@@ -296,6 +297,11 @@ class TestUpdate(unittest.TestCase):
         self.assertEqual("classgraph", update.pom_dependency.artifact)
         self.assertEqual("io.github.classgraph", update.pom_dependency.group)
         self.assertEqual("4.8.71", update.pom_dependency.get_version())
+
+    def test_update_mock_init(self):
+        update: Update = FileHelper.setup_update_repo(self)
+        self.assertEqual(type(update), Update)
+        FileHelper.teardown()
 
 
 if __name__ == '__main__':
