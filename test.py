@@ -51,41 +51,41 @@ class FileHelper:
                 f"{filename_a} and {filename_b} have the same contents")
 
     @staticmethod
-    def setup_branch_repo(test_case: unittest.TestCase) -> Branch:
+    def _setup_repo(test_case: unittest.TestCase) -> str:
         test_case.assertFalse("/" in FileHelper.git_dir
                               or "." in FileHelper.git_dir)
         cwd1 = subprocess.run(
             ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
         test_case.assertTrue(str(cwd1))
-        branch = Branch(FileHelper.git_branch, based_on="master",
-                        _git_dir_to_make=FileHelper.git_dir,
-                        _pom_filename_to_copy=FileHelper.pom_filename)
+        return cwd1
+
+    @staticmethod
+    def _verify_repo(test_case: unittest.TestCase, cwd1: str):
         cwd2 = subprocess.run(
             ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
         test_case.assertEqual(cwd1, cwd2)
         test_case.assertTrue(os.path.isdir(FileHelper.git_dir))
         test_case.assertTrue(os.path.isdir(FileHelper.git_dir + "/.git"))
         test_case.assertTrue(os.path.isfile(FileHelper.pom_path_in_git))
+
+    @staticmethod
+    def setup_branch_repo(test_case: unittest.TestCase) -> Branch:
+        cwd1 = FileHelper._setup_repo(test_case)
+        branch = Branch(FileHelper.git_branch, based_on="master",
+                        _git_dir_to_make=FileHelper.git_dir,
+                        _pom_filename_to_copy=FileHelper.pom_filename)
+        FileHelper._verify_repo(test_case, cwd1)
         return branch
 
     @staticmethod
     def setup_update_repo(test_case: unittest.TestCase) -> Update:
-        test_case.assertFalse("/" in FileHelper.git_dir
-                              or "." in FileHelper.git_dir)
-        cwd1 = subprocess.run(
-            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-        test_case.assertTrue(str(cwd1))
+        cwd1 = FileHelper._setup_repo(test_case)
         update = Update(FileHelper.classgraph_update_line,
                         branch_to_update_from="master",
                         pom_path=FileHelper.pom_path_in_git,
                         _git_dir_to_make=FileHelper.git_dir,
                         _pom_filename_to_copy=FileHelper.pom_filename)
-        cwd2 = subprocess.run(
-            ['pwd'], check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-        test_case.assertEqual(cwd1, cwd2)
-        test_case.assertTrue(os.path.isdir(FileHelper.git_dir))
-        test_case.assertTrue(os.path.isdir(FileHelper.git_dir + "/.git"))
-        test_case.assertTrue(os.path.isfile(FileHelper.pom_path_in_git))
+        FileHelper._verify_repo(test_case, cwd1)
         return update
 
     @staticmethod
