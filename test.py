@@ -220,12 +220,12 @@ class TestMaven(unittest.TestCase):
 
 
 class TestBranch(unittest.TestCase):
-    def test_branch_mock_init(self):
+    def test_branch_sandbox_init(self):
         branch: Branch = FileHelper.setup_branch_repo(self)
         self.assertEqual(type(branch), Branch)
         FileHelper.teardown()
 
-    def test_branch_mock_switch_to(self):
+    def test_branch_sandbox_activate(self):
         branch = FileHelper.setup_branch_repo(self)
         old_branch = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
@@ -241,7 +241,7 @@ class TestBranch(unittest.TestCase):
         self.assertNotEqual(old_branch, new_branch)
         FileHelper.teardown()
 
-    def test_branch_mock_switch_and_commit(self):
+    def test_branch_sandbox_activate_and_commit(self):
         FileHelper.setup_branch_repo(self).activate()
         with open(FileHelper.pom_path_in_git, 'w') as f:
             f.write(FileHelper.pom_update_contents_a)
@@ -258,7 +258,7 @@ class TestBranch(unittest.TestCase):
                                       FileHelper.pom_path_in_git, self)
         FileHelper.teardown()
 
-    def test_branch_mock_switch_commit_switch(self):
+    def test_branch_sandbox_activate_commit_activate(self):
         branch_a = FileHelper.setup_branch_repo(self)
         branch_a.activate()
         with open(FileHelper.pom_path_in_git, 'w') as f:
@@ -298,10 +298,12 @@ class TestUpdate(unittest.TestCase):
         self.assertEqual("io.github.classgraph", update.pom_dependency.group)
         self.assertEqual("4.8.71", update.pom_dependency.get_version())
 
-    def test_update_mock_init(self):
+    def test_update_sandbox_init(self):
         update: Update = FileHelper.setup_update_repo(self)
         self.assertEqual(type(update), Update)
         FileHelper.teardown()
+
+
 
 
 if __name__ == '__main__':
