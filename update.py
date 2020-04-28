@@ -18,13 +18,13 @@ from maven import Pom
 
 class Update:
     def __init__(self, update_line: str, branch_to_update_from: str = "master",
-                 pom_filename: str = "pom.xml", _git_dir_to_make: str = None,
+                 pom_path: str = "pom.xml", _git_dir_to_make: str = None,
                  _pom_filename_to_copy: str = None):
         self.update_line = update_line
         self.branch_to_update_from = branch_to_update_from
-        self._pom_filename = pom_filename
+        self._pom_path = pom_path
         self.parsed = False
-        self._pom = Pom(self._pom_filename)
+        self._pom = None
         self.group = None
         self.artifact = None
         self.current = None
@@ -46,6 +46,7 @@ class Update:
             self.branch = Branch(f"update-{artifact}", branch_to_update_from,
                                  _git_dir_to_make=_git_dir_to_make,
                                  _pom_filename_to_copy=_pom_filename_to_copy)
+            self._pom = Pom(self._pom_path)  # must be after Branch creates repo
             self.pom_dependency = self._pom.get_dependency(
                 artifact_id=artifact, group_id=group, version=current_version)
 
@@ -60,7 +61,7 @@ class Update:
                                + str(self.update_line))
         self.branch.activate()
         self.pom_dependency.set_version(self.latest)
-        self._pom.save(self._pom_filename)
+        self._pom.save(self._pom_path)
 
     def __str__(self):
         if self.parsed:

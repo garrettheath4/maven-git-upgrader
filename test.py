@@ -77,7 +77,7 @@ class FileHelper:
         test_case.assertTrue(str(cwd1))
         update = Update(FileHelper.classgraph_update_line,
                         branch_to_update_from="master",
-                        pom_filename=FileHelper.pom_filename,
+                        pom_path=FileHelper.pom_path_in_git,
                         _git_dir_to_make=FileHelper.git_dir,
                         _pom_filename_to_copy=FileHelper.pom_filename)
         cwd2 = subprocess.run(
@@ -287,7 +287,7 @@ class TestBranch(unittest.TestCase):
 class TestUpdate(unittest.TestCase):
     def test_update_line_classgraph(self):
         update = Update(FileHelper.classgraph_update_line,
-                        pom_filename=FileHelper.pom_filename)
+                        pom_path=FileHelper.pom_filename)
         self.assertTrue(update.parsed)
         self.assertEqual("io.github.classgraph", update.group)
         self.assertEqual("classgraph", update.artifact)
@@ -306,6 +306,12 @@ class TestUpdate(unittest.TestCase):
     def test_update_sandbox_apply(self):
         update: Update = FileHelper.setup_update_repo(self)
         update.apply()
+        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
+                                          FileHelper.pom_path_in_git, self)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
+                       check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
 
