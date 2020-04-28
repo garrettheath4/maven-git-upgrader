@@ -195,6 +195,14 @@ class TestBranch(unittest.TestCase):
         self.assertTrue(os.path.isdir(TestBranch.git_dir + "/.git"))
         return branch
 
+    @staticmethod
+    def _teardown():
+        subprocess.run(['rm',
+                        TestBranch.git_dir + "/" + TestBranch.pom_filename],
+                       check=True)
+        subprocess.run(['rm', '-r', TestBranch.git_dir + "/.git"], check=True)
+        subprocess.run(['rmdir', TestBranch.git_dir], check=True)
+
     def test_branch_mock_init(self):
         self._setup_branch_repo()
         self._teardown()
@@ -232,29 +240,26 @@ class TestBranch(unittest.TestCase):
                                       TestBranch.pom_path_in_git, self)
         self._teardown()
 
-    # TODO: test_branch_mock_switch_to_TWO
-    # def test_branch_mock_switch_commit_switch(self):
-    #     branch_a = self._setup_branch_repo()
-    #     branch_a.activate()
-    #     with open(TestBranch.pom_path_in_git, 'w') as f:
-    #         f.write(TestBranch.pom_update_contents_a)
-    #     subprocess.run(['git', 'add', TestBranch.pom_filename],
-    #                    check=True, cwd=TestBranch.git_dir)
-    #     subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
-    #                    check=True, cwd=TestBranch.git_dir)
-    #     branch_b = Branch(TestBranch.git_branch_b, based_on="master",
-    #                       _git_dir_to_make=TestBranch.git_dir,
-    #                       _pom_filename_to_copy=TestBranch.pom_filename)
-    #     FileHelper.assert_files_equal(TestBranch.pom_filename,
-    #                                   TestBranch.pom_path_in_git, self)
-    #     self._teardown()
-
-    def _teardown(self):
-        subprocess.run(['rm',
-                        TestBranch.git_dir + "/" + TestBranch.pom_filename],
-                       check=True)
-        subprocess.run(['rm', '-r', TestBranch.git_dir + "/.git"], check=True)
-        subprocess.run(['rmdir', TestBranch.git_dir], check=True)
+    def test_branch_mock_switch_commit_switch(self):
+        branch_a = self._setup_branch_repo()
+        branch_a.activate()
+        with open(TestBranch.pom_path_in_git, 'w') as f:
+            f.write(TestBranch.pom_update_contents_a)
+        subprocess.run(['git', 'add', TestBranch.pom_filename],
+                       check=True, cwd=TestBranch.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
+                       check=True, cwd=TestBranch.git_dir)
+        branch_b = Branch(TestBranch.git_branch_b, based_on="master",
+                          _git_dir_to_make=TestBranch.git_dir,
+                          _pom_filename_to_copy=TestBranch.pom_filename)
+        branch_b.activate()
+        FileHelper.assert_files_equal(TestBranch.pom_filename,
+                                      TestBranch.pom_path_in_git, self)
+        with open(TestBranch.pom_path_in_git, 'w') as f:
+            f.write(TestBranch.pom_update_contents_b)
+        FileHelper.assert_files_not_equal(TestBranch.pom_filename,
+                                          TestBranch.pom_path_in_git, self)
+        self._teardown()
 
 
 if __name__ == '__main__':
