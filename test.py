@@ -357,9 +357,12 @@ class TestUpdate(unittest.TestCase):
 
     def test_update_sandbox_apply(self):
         update: Update = FileHelper.setup_update_repo(self)
-        # FileHelper.basic_file_update_check(FileHelper.pom_filename,
-        #                                    )
         update.apply()
+        FileHelper.basic_file_update_check(FileHelper.pom_filename,
+                                           FileHelper.classgraph_version_old,
+                                           FileHelper.pom_path_in_git,
+                                           FileHelper.classgraph_version_new,
+                                           self)
         FileHelper.assert_files_not_equal(FileHelper.pom_filename,
                                           FileHelper.pom_path_in_git, self)
         subprocess.run(['git', 'add', FileHelper.pom_filename],
@@ -368,7 +371,7 @@ class TestUpdate(unittest.TestCase):
                        check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
-    def test_update_sandbox_apply(self):
+    def test_update_sandbox_apply_two(self):
         update: Update = FileHelper.setup_update_repo(self)
         update.apply()
         FileHelper.assert_files_not_equal(FileHelper.pom_filename,
