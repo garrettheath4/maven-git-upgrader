@@ -18,8 +18,12 @@ class FileHelper:
     pom_update_contents_b = "Updated\nin\nnew\nbranch B.\n"
 
     # for TestUpdate
-    classgraph_update_line = "[INFO]   io.github.classgraph:classgraph " \
-                             "..................... 4.8.71 -> 4.8.75"
+    classgraph_version_old = "4.8.71"
+    classgraph_version_new = "4.8.75"
+    classgraph_update_line = f"[INFO]   io.github.classgraph:classgraph" \
+                             f" ....................." \
+                             f" {classgraph_version_old}" \
+                             f" -> {classgraph_version_new}"
 
     @staticmethod
     def assert_file_contains(filename: str, search_string: str,
@@ -349,6 +353,19 @@ class TestUpdate(unittest.TestCase):
     def test_update_sandbox_init(self):
         update: Update = FileHelper.setup_update_repo(self)
         self.assertEqual(type(update), Update)
+        FileHelper.teardown()
+
+    def test_update_sandbox_apply(self):
+        update: Update = FileHelper.setup_update_repo(self)
+        # FileHelper.basic_file_update_check(FileHelper.pom_filename,
+        #                                    )
+        update.apply()
+        FileHelper.assert_files_not_equal(FileHelper.pom_filename,
+                                          FileHelper.pom_path_in_git, self)
+        subprocess.run(['git', 'add', FileHelper.pom_filename],
+                       check=True, cwd=FileHelper.git_dir)
+        subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
+                       check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
     def test_update_sandbox_apply(self):
