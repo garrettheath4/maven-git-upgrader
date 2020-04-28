@@ -73,6 +73,20 @@ class FileHelper:
                 f"{filename_a} and {filename_b} have the same contents")
 
     @staticmethod
+    def basic_file_update_check(old_filename: str, old_search_text: str,
+                                new_filename: str, new_search_text: str,
+                                test_case: unittest.TestCase,
+                                skip_old_text_not_in_new_file: bool = False):
+        test_case.assertTrue(os.path.isfile(old_filename))
+        FileHelper.assert_file_contains(old_filename, old_search_text, test_case)
+        FileHelper.assert_file_does_not_contain(old_filename, new_search_text, test_case)
+        test_case.assertTrue(os.path.isfile(new_filename))
+        FileHelper.assert_file_contains(new_filename, new_search_text, test_case)
+        if not skip_old_text_not_in_new_file:
+            FileHelper.assert_file_does_not_contain(new_filename,
+                                                    old_search_text, test_case)
+
+    @staticmethod
     def _setup_repo(test_case: unittest.TestCase) -> str:
         test_case.assertFalse(os.path.isdir(FileHelper.git_dir))
         test_case.assertFalse(os.path.isdir(FileHelper.git_dir + "/.git"))
@@ -147,9 +161,11 @@ class TestMaven(unittest.TestCase):
         artifact_tag = f"<artifactId>{artifact}</artifactId>"
         dep = pom.get_dependency(artifact)
         self.assertIsNotNone(dep)
+        old_version = dep.get_version()
         dep.set_version(new_version)
         pom.save(output_filename)
-        self.assertTrue(os.path.isfile(output_filename))
+        FileHelper.basic_file_update_check(input_filename, old_version,
+                                           output_filename, new_version, self)
         with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
             i_curr = "\n"
             o_curr = i_curr
@@ -182,11 +198,14 @@ class TestMaven(unittest.TestCase):
         artifact = "scala-library"
         dep = pom.get_dependency(artifact)
         self.assertIsNotNone(dep)
+        old_version = dep.get_version()
         dep.set_version(new_version)
         prop_name = dep.prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)
-        self.assertTrue(os.path.isfile(output_filename))
+        FileHelper.basic_file_update_check(input_filename, old_version,
+                                           output_filename, new_version, self,
+                                           skip_old_text_not_in_new_file=True)
         with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
             i_curr = "\n"
             o_curr = i_curr
@@ -216,14 +235,18 @@ class TestMaven(unittest.TestCase):
         artifact2 = "logback-core"
         dep1 = pom.get_dependency(artifact1)
         self.assertIsNotNone(dep1)
+        old_version = dep1.get_version()
         dep1.set_version(new_version)
         dep2 = pom.get_dependency(artifact2)
         self.assertIsNotNone(dep2)
         self.assertEqual(new_version, dep2.get_version())
+        self.assertNotEqual(old_version, dep2.get_version())
         prop_name = dep1.prop_name
         version_prop_tag = f"<{prop_name}>"
         pom.save(output_filename)
         self.assertTrue(os.path.isfile(output_filename))
+        FileHelper.basic_file_update_check(input_filename, old_version,
+                                           output_filename, new_version, self)
         with open(input_filename, 'r') as i, open(output_filename, 'r') as o:
             i_curr = "\n"
             o_curr = i_curr
