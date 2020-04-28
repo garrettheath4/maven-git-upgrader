@@ -303,7 +303,10 @@ class TestUpdate(unittest.TestCase):
         self.assertEqual(type(update), Update)
         FileHelper.teardown()
 
-
+    def test_update_sandbox_apply(self):
+        update: Update = FileHelper.setup_update_repo(self)
+        update.apply()
+        FileHelper.teardown()
 
 
 if __name__ == '__main__':

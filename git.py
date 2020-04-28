@@ -38,6 +38,10 @@ class Branch:
             stdout=subprocess.PIPE, check=True, cwd=self._git_directory)
         current_branch_str = current_branch_proc.stdout.decode('utf-8')
         if current_branch_str != self.name:
+            subprocess.run(['git', 'update-index', '--refresh'],
+                           cwd=self._git_directory)
+            subprocess.run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
+                           check=True, cwd=self._git_directory)
             subprocess.run(['git', 'checkout', self.based_on],
                            check=True, cwd=self._git_directory)
             subprocess.run(['git', 'checkout', '-b', self.name],
