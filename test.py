@@ -52,6 +52,9 @@ class FileHelper:
 
     @staticmethod
     def _setup_repo(test_case: unittest.TestCase) -> str:
+        test_case.assertFalse(os.path.isdir(FileHelper.git_dir))
+        test_case.assertFalse(os.path.isdir(FileHelper.git_dir + "/.git"))
+        test_case.assertFalse(os.path.isfile(FileHelper.pom_path_in_git))
         test_case.assertFalse("/" in FileHelper.git_dir
                               or "." in FileHelper.git_dir)
         cwd1 = subprocess.run(
