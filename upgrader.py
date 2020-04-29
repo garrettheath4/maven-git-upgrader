@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 maven-git-updater
 
@@ -16,23 +17,11 @@ upgrader.py (the main script; this script)
         +-> Dependency (represents a single dependency element in the Pom xml)
 """
 
-import sys
-import subprocess
 import logging
+import subprocess
 from typing import List
 
 from update import Update
-
-
-logging.basicConfig(level="DEBUG")
-log = logging.getLogger("upgrader")
-
-
-def main():
-    log.debug("Python version " + sys.version.split('\n')[0])
-    updates = calculate_updates()
-    for u in updates:
-        print(u)
 
 
 def calculate_updates(git_directory: str = None) -> List[Update]:
@@ -53,17 +42,13 @@ def calculate_updates(git_directory: str = None) -> List[Update]:
 
     :return: List of Update objects
     """
-    log.info("Maven is checking for updates...")
+    logging.info("Maven is checking for updates...")
     display_updates = subprocess.run(
         ['mvn', 'versions:display-dependency-updates'],
         stdout=subprocess.PIPE, check=True, cwd=git_directory)
-    log.info("Maven done. Processing updates...")
+    logging.info("Maven done. Processing updates...")
     stdout = display_updates.stdout.decode('utf-8')
     lines = stdout.split('\n')
     upgrade_lines = filter(lambda l: l.startswith("[INFO] ") and " -> " in l,
                            lines)
     return list(map(Update, upgrade_lines))
-
-
-if __name__ == "__main__":
-    main()

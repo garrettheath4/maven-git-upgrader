@@ -9,9 +9,6 @@ from typing import List, Optional
 
 from cxml import CommentedTreeBuilder
 
-logging.basicConfig(level="DEBUG")
-log = logging.getLogger("maven")
-
 
 nsp = 'm'
 nsu = "http://maven.apache.org/POM/4.0.0"
@@ -25,7 +22,7 @@ class Dependency:
     def __init__(self, dependency_xml: ET.Element, properties_xml: ET.Element):
         group_xml = dependency_xml.find(M+"groupId", NS)
         if group_xml is None:
-            log.warning("Dependency group XML should not be None!")
+            logging.warning("Dependency group XML should not be None!")
         self.group: str = group_xml.text
         self.artifact: str = dependency_xml.find(M+"artifactId", NS).text
         self._version_xml: Optional[ET.Element] = \
@@ -68,9 +65,9 @@ class Pom:
         if dep_list:
             return dep_list[0]
         else:
-            log.warning("Pom.get_dependency(%s, %s, %s) found no matching"
-                        " dependency and is returning None",
-                        artifact_id, group_id, version)
+            logging.warning("Pom.get_dependency(%s, %s, %s) found no matching"
+                            " dependency and is returning None",
+                            artifact_id, group_id, version)
             return None
 
     def save(self, filename: str):
