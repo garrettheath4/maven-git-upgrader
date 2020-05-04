@@ -22,16 +22,23 @@ import re
 import subprocess
 from typing import List
 
-from mavengitupgrader.update import Update, update_from_matches_tuple
+from mavengitupgrader.update import (
+    Update,
+    update_from_matches_tuple_using_source_branch_fn
+)
 
 
-def stdout_to_update_list(maven_stdout: str) -> List[Update]:
+def stdout_to_update_list(maven_stdout: str, source_branch: str = "master") -> \
+        List[Update]:
     matches = re.findall(Update.update_line_matcher, maven_stdout)
     logging.debug("Parsed %d available updates from Maven output", len(matches))
-    return list(map(update_from_matches_tuple, matches))
+    return list(map(
+        update_from_matches_tuple_using_source_branch_fn(source_branch), matches
+    ))
 
 
-def calculate_updates(git_directory: str = None) -> List[Update]:
+def calculate_updates(git_directory: str = None,
+                      git_source_branch: str = "master") -> List[Update]:
     """
     Runs `mvn versions:display-dependency-updates` and parses the output to
     return a list of Update objects representing the Maven project's
@@ -58,4 +65,17 @@ def calculate_updates(git_directory: str = None) -> List[Update]:
         logging.error(stdout)
         display_updates.check_returncode()
     logging.info("Maven done. Processing updates...")
-    return stdout_to_update_list(stdout)
+    return stdout_to_update_list(maven_stdout=stdout,
+                                 source_branch=git_source_branch)
+
+
+def apply_updates(updates: List[Update]):
+    for u in updates:
+        u.apply()
+
+
+def calculate_and_apply_updates(git_directory: str = None,
+                                git_source_branch: str = "master"):
+    updates = calculate_updates(git_directory=git_directory,
+                                git_source_branch=git_source_branch)
+    apply_updates(updates)

@@ -13,11 +13,52 @@ __maintainer__ = "Garrett Heath Koller"
 __email__ = "garrettheath4@gmail.com"
 __status__ = "Prototype"
 
+import argparse
 import logging
 import os
 import sys
 
-from mavengitupgrader.upgrader import calculate_updates
+from mavengitupgrader.upgrader import calculate_updates, apply_updates
+
+
+def main():
+    logging.debug("Python version " + sys.version.split('\n')[0])
+    logging.debug(f"__file__ = {__file__}")
+    args = parse_args()
+    git_directory = args.dir
+    if not git_directory:
+        if wrong_current_directory():
+            raise RuntimeError("Switch to a different directory before running "
+                               "this module with `python3 -m mavengitupgrader`")
+        logging.info("Upgrading Maven project in Git repo in current directory")
+    git_source_branch = args.branch
+    updates = calculate_updates(git_directory=git_directory,
+                                git_source_branch=git_source_branch)
+    for update in updates:
+        print(update)
+    response = input(f"Apply the above updates to the '{git_source_branch}' "
+                     f"branch? (yes/no) [default: yes]: ")
+    if not response or (response and response.lower()[0] != 'n'):
+        logging.info("Applying %d updates...", len(updates))
+        apply_updates(updates)
+    else:
+        logging.info("Exiting.")
+
+
+def parse_args():
+    description = "Checks for updates to dependencies in a Maven project and " \
+                  "creates a Git branch for each update for isolated testing " \
+                  "and easy integration."
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-g', '--git-repo', type=str, dest='dir', default=None,
+                        help="The path to the directory containing a Git "
+                             "repository for a valid Maven project (default: "
+                             "current directory)")
+    parser.add_argument('-b', '--source-branch', type=str, dest='branch',
+                        default='master',
+                        help="The Git branch in the repository to base updates "
+                             "on (default: 'master' branch")
+    return parser.parse_args()
 
 
 def wrong_current_directory() -> bool:
@@ -34,14 +75,4 @@ def wrong_current_directory() -> bool:
 
 
 if __name__ == "__main__":
-    logging.debug("Python version " + sys.version.split('\n')[0])
-    logging.debug(f"__file__ = {__file__}")
-    git_directory = None
-    if len(sys.argv) == 2:
-        git_directory = sys.argv[1]
-    if not git_directory and wrong_current_directory():
-        raise RuntimeError("Switch to a different directory before running "
-                           "this module with `python -m mavengitupgrader`")
-    updates = calculate_updates(git_directory=git_directory)
-    for u in updates:
-        print(u)
+    main()

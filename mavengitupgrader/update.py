@@ -11,6 +11,7 @@ Update (in this module)
 """
 import logging
 import re
+from typing import Callable, Tuple
 
 from mavengitupgrader.git import Branch
 from mavengitupgrader.maven import Pom
@@ -93,8 +94,14 @@ class Update:
             return self.update_line
 
 
-def update_from_matches_tuple(matches: tuple) -> Update:
+def update_from_matches_tuple(matches: tuple,
+                              source_branch: str = "master") -> Update:
     (group, artifact, _, current_version, latest_version) = matches
     return Update(group=group, artifact=artifact,
                   current_version=current_version,
-                  latest_version=latest_version)
+                  latest_version=latest_version, source_branch=source_branch)
+
+
+def update_from_matches_tuple_using_source_branch_fn(source_branch: str) -> \
+        Callable[[Tuple], Update]:
+    return lambda matches: update_from_matches_tuple(matches, source_branch)
