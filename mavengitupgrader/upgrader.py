@@ -51,8 +51,11 @@ def calculate_updates(git_directory: str = None) -> List[Update]:
     """
     logging.info("Maven is checking for updates...")
     display_updates = subprocess.run(
-        ['mvn', 'versions:display-dependency-updates'],
-        stdout=subprocess.PIPE, check=True, cwd=git_directory)
-    logging.info("Maven done. Processing updates...")
+        ['mvn', 'versions:display-dependency-updates'], stdout=subprocess.PIPE,
+        cwd=git_directory)
     stdout = display_updates.stdout.decode('utf-8')
+    if display_updates.returncode:
+        logging.error(stdout)
+        display_updates.check_returncode()
+    logging.info("Maven done. Processing updates...")
     return stdout_to_update_list(stdout)
