@@ -27,7 +27,7 @@ from mavengitupgrader.update import Update, update_from_matches_tuple
 
 def stdout_to_update_list(maven_stdout: str) -> List[Update]:
     matches = re.findall(Update.update_line_matcher, maven_stdout)
-    logging.debug("File contains %d matches", len(matches))
+    logging.debug("Parsed %d available updates from Maven output", len(matches))
     return list(map(update_from_matches_tuple, matches))
 
 
