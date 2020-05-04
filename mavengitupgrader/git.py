@@ -53,10 +53,24 @@ class Branch:
 
     def activate(self):
         self.prepare()
-        logging.info("Creating new branch %s based on %s",
-                     self.name, self.based_on)
-        subprocess.run(['git', 'checkout', '-b', self.name],
-                       check=True, cwd=self._git_directory)
+        local_exists: bool = subprocess.run(
+            ['git', 'rev-parse', '--verify', self.name],
+            cwd=self._git_directory
+        ).returncode == 0
+        remote_exists: bool = subprocess.run(
+            ['git', 'ls-remote', '--exit-code', '--heads', 'origin', self.name],
+            cwd=self._git_directory
+        ).returncode == 0
+        if local_exists or remote_exists:
+            logging.info("Checking out existing %s branch %s",
+                         "local" if local_exists else "remote", self.name)
+            subprocess.run(['git', 'checkout', self.name],
+                           check=True, cwd=self._git_directory)
+        else:
+            logging.info("Creating new branch %s based on %s",
+                         self.name, self.based_on)
+            subprocess.run(['git', 'checkout', '-b', self.name],
+                           check=True, cwd=self._git_directory)
 
     def commit(self, message: str, pom_file: str = "pom.xml"):
         subprocess.run(['git', 'add', pom_file],
