@@ -1,7 +1,7 @@
 """
 Branch (represents the Git branch that the update will be contained in)
 """
-
+import logging
 import subprocess
 import os.path
 
@@ -37,12 +37,26 @@ class Branch:
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             stdout=subprocess.PIPE, check=True, cwd=self._git_directory)
         current_branch_str = current_branch_proc.stdout.decode('utf-8')
+        logging.info("Creating new branch %s based on %s",
+                     self.name, self.based_on)
+        logging.debug("Current branch: %s", current_branch_str)
         if current_branch_str != self.name:
             subprocess.run(['git', 'update-index', '--refresh'],
                            cwd=self._git_directory)
-            subprocess.run(['git', 'diff-index', '--quiet', 'HEAD', '--'],
-                           check=True, cwd=self._git_directory)
+            diff_proc = subprocess.run(
+                ['git', 'diff-index', '--quiet', 'HEAD', '--'],
+                cwd=self._git_directory)
+            if diff_proc.returncode:
+                logging.error(diff_proc.stdout)
+                logging.error("Git directory is not clean")
+                diff_proc.check_returncode()
             subprocess.run(['git', 'checkout', self.based_on],
                            check=True, cwd=self._git_directory)
             subprocess.run(['git', 'checkout', '-b', self.name],
                            check=True, cwd=self._git_directory)
+
+    def commit(self, message: str, pom_file: str = "pom.xml"):
+        subprocess.run(['git', 'add', pom_file],
+                       check=True, cwd=self._git_directory)
+        subprocess.run(['git', 'commit', '-m', message],
+                       check=True, cwd=self._git_directory)

@@ -87,5 +87,6 @@ class Pom:
                                       project_tag_two_lines, 1)
         if not xml_str.endswith('\n'):
             xml_str += '\n'
+        logging.info("Saving pom file as %s", filename)
         with open(filename, 'w') as output:
             output.write(xml_str)

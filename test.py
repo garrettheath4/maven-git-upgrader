@@ -378,19 +378,11 @@ class TestUpdate(unittest.TestCase):
                                            FileHelper.pom_path_in_git,
                                            FileHelper.classgraph_version_new,
                                            self)
-        subprocess.run(['git', 'add', FileHelper.pom_filename],
-                       check=True, cwd=FileHelper.git_dir)
-        subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
-                       check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
     def test_update_sandbox_apply_two(self):
         update_a: Update = FileHelper.setup_update_repo(self)
         update_a.apply()
-        subprocess.run(['git', 'add', FileHelper.pom_filename],
-                       check=True, cwd=FileHelper.git_dir)
-        subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
-                       check=True, cwd=FileHelper.git_dir)
         update_b = Update(FileHelper.fusion_core_update_line,
                           source_branch="master",
                           pom_path=FileHelper.pom_path_in_git,
@@ -406,10 +398,6 @@ class TestUpdate(unittest.TestCase):
                                         FileHelper.classgraph_version_old, self)
         FileHelper.assert_file_does_not_contain(
             FileHelper.pom_path_in_git, FileHelper.classgraph_version_new, self)
-        subprocess.run(['git', 'add', FileHelper.pom_filename],
-                       check=True, cwd=FileHelper.git_dir)
-        subprocess.run(['git', 'commit', '-m', "Update in Branch B"],
-                       check=True, cwd=FileHelper.git_dir)
         FileHelper.teardown()
 
 

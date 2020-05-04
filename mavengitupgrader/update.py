@@ -10,6 +10,7 @@ Update (in this module)
     +-> Dependency (represents a single dependency element in the Pom xml)
 """
 import logging
+import os
 import re
 from typing import Callable, Tuple
 
@@ -86,10 +87,13 @@ class Update:
         self.target_branch.activate()
         self.pom_dependency.set_version(self.latest_version)
         self._pom.save(self._pom_path)
+        self.target_branch.commit(f"Updating dependency {str(self)}",
+                                  os.path.basename(self._pom_path))
 
     def __str__(self):
         if self.parsed:
-            return f"{self.group}:{self.artifact} {self.current_version} -> {self.latest_version}"
+            return f"{self.group}:{self.artifact} " \
+                   f"{self.current_version} -> {self.latest_version}"
         else:
             return self.update_line
 
