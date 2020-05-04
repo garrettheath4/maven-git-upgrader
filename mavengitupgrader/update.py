@@ -75,7 +75,7 @@ class Update:
         self.pom_dependency = self._pom.get_dependency(
             artifact_id=artifact, group_id=group, version=current_version)
 
-    def apply(self):
+    def apply(self, switch_to_source_branch_afterwards: bool = True):
         if not self.parsed:
             raise RuntimeError("Unable to apply Update because the provided"
                                " update line was unable to be parsed: "
@@ -89,6 +89,8 @@ class Update:
         self._pom.save(self._pom_path)
         self.target_branch.commit(f"Updating dependency {str(self)}",
                                   os.path.basename(self._pom_path))
+        if switch_to_source_branch_afterwards:
+            self.target_branch.prepare()
 
     def __str__(self):
         if self.parsed:

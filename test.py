@@ -372,7 +372,7 @@ class TestUpdate(unittest.TestCase):
 
     def test_update_sandbox_apply(self):
         update: Update = FileHelper.setup_update_repo(self)
-        update.apply()
+        update.apply(False)
         FileHelper.basic_file_update_check(FileHelper.pom_filename,
                                            FileHelper.classgraph_version_old,
                                            FileHelper.pom_path_in_git,
@@ -382,13 +382,13 @@ class TestUpdate(unittest.TestCase):
 
     def test_update_sandbox_apply_two(self):
         update_a: Update = FileHelper.setup_update_repo(self)
-        update_a.apply()
+        update_a.apply(False)
         update_b = Update(FileHelper.fusion_core_update_line,
                           source_branch="master",
                           pom_path=FileHelper.pom_path_in_git,
                           _git_dir_to_make=FileHelper.git_dir,
                           _pom_filename_to_copy=FileHelper.pom_filename)
-        update_b.apply()
+        update_b.apply(False)
         FileHelper.basic_file_update_check(FileHelper.pom_filename,
                                            FileHelper.fusion_version_old,
                                            FileHelper.pom_path_in_git,
