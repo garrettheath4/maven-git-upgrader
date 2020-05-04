@@ -18,10 +18,17 @@ upgrader.py (the main script; this script)
 """
 
 import logging
+import re
 import subprocess
 from typing import List
 
-from mavengitupgrader.update import Update
+from mavengitupgrader.update import Update, update_from_matches_tuple
+
+
+def stdout_to_update_list(maven_stdout: str) -> List[Update]:
+    matches = re.findall(Update.update_line_matcher, maven_stdout)
+    logging.debug("File contains %d matches", len(matches))
+    return list(map(update_from_matches_tuple, matches))
 
 
 def calculate_updates(git_directory: str = None) -> List[Update]:
@@ -48,7 +55,4 @@ def calculate_updates(git_directory: str = None) -> List[Update]:
         stdout=subprocess.PIPE, check=True, cwd=git_directory)
     logging.info("Maven done. Processing updates...")
     stdout = display_updates.stdout.decode('utf-8')
-    lines = stdout.split('\n')
-    upgrade_lines = filter(lambda l: l.startswith("[INFO] ") and " -> " in l,
-                           lines)
-    return list(map(Update, upgrade_lines))
+    return stdout_to_update_list(stdout)

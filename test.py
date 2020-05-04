@@ -28,6 +28,11 @@ class FileHelper:
     fusion_core_update_line = \
         "[INFO]   us.catalist.fusion:fusion-core ........................" \
         f" {fusion_version_old} -> {fusion_version_new}"
+    twoline_update_line = \
+        "[INFO]   com.fasterxml.jackson.module:jackson-module-scala_2.11 " \
+        "...\n" \
+        "[INFO]                                                         " \
+        "2.10.3 -> 2.11.0"
 
     @staticmethod
     def assert_file_contains(filename: str, search_string: str,
@@ -129,7 +134,7 @@ class FileHelper:
     def setup_update_repo(test_case: unittest.TestCase) -> Update:
         cwd1 = FileHelper._setup_repo(test_case)
         update = Update(FileHelper.classgraph_update_line,
-                        branch_to_update_from="master",
+                        source_branch="master",
                         pom_path=FileHelper.pom_path_in_git,
                         _git_dir_to_make=FileHelper.git_dir,
                         _pom_filename_to_copy=FileHelper.pom_filename)
@@ -348,12 +353,17 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(update.parsed)
         self.assertEqual("io.github.classgraph", update.group)
         self.assertEqual("classgraph", update.artifact)
-        self.assertEqual("4.8.71", update.current)
-        self.assertEqual("4.8.75", update.latest)
-        self.assertEqual("update-classgraph", update.branch.name)
+        self.assertEqual("4.8.71", update.current_version)
+        self.assertEqual("4.8.75", update.latest_version)
+        self.assertEqual("update-classgraph", update.target_branch.name)
         self.assertEqual("classgraph", update.pom_dependency.artifact)
         self.assertEqual("io.github.classgraph", update.pom_dependency.group)
         self.assertEqual("4.8.71", update.pom_dependency.get_version())
+
+    def test_update_line_with_line_break(self):
+        update = Update(FileHelper.twoline_update_line,
+                        pom_path=FileHelper.pom_filename)
+        self.assertTrue(update.parsed)
 
     def test_update_sandbox_init(self):
         update: Update = FileHelper.setup_update_repo(self)
@@ -382,7 +392,7 @@ class TestUpdate(unittest.TestCase):
         subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
                        check=True, cwd=FileHelper.git_dir)
         update_b = Update(FileHelper.fusion_core_update_line,
-                          branch_to_update_from="master",
+                          source_branch="master",
                           pom_path=FileHelper.pom_path_in_git,
                           _git_dir_to_make=FileHelper.git_dir,
                           _pom_filename_to_copy=FileHelper.pom_filename)
