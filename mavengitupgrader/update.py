@@ -12,8 +12,8 @@ Update (in this module)
 
 import re
 
-from git import Branch
-from maven import Pom
+from mavengitupgrader.git import Branch
+from mavengitupgrader.maven import Pom
 
 
 class Update:

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import logging
 from typing import List, Optional
 
-from cxml import CommentedTreeBuilder
+from mavengitupgrader.cxml import CommentedTreeBuilder
 
 
 nsp = 'm'

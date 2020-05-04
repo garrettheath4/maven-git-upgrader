@@ -16,7 +16,7 @@ __status__ = "Prototype"
 import logging
 import sys
 
-from upgrader import calculate_updates
+from mavengitupgrader.upgrader import calculate_updates
 
 if __name__ == "__main__":
     logging.debug("Python version " + sys.version.split('\n')[0])

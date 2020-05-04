@@ -2,9 +2,9 @@ import os.path
 import subprocess
 import unittest
 
-from git import Branch
-from maven import Pom
-from update import Update
+from mavengitupgrader.git import Branch
+from mavengitupgrader.maven import Pom
+from mavengitupgrader.update import Update
 
 
 class FileHelper:

@@ -21,7 +21,7 @@ import logging
 import subprocess
 from typing import List
 
-from update import Update
+from mavengitupgrader.update import Update
 
 
 def calculate_updates(git_directory: str = None) -> List[Update]:
