@@ -1,0 +1,171 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --------------------< us.catalist.fusion:fusion-ui >--------------------
+[INFO] Building fusion-ui 5.12.1-SNAPSHOT
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO]
+[INFO] --- versions-maven-plugin:2.7:display-dependency-updates (default-cli) @ fusion-ui ---
+[INFO] artifact com.fasterxml.jackson.module:jackson-module-scala_2.11: checking for updates from artifactory-server
+[INFO] artifact ch.qos.logback:logback-core: checking for updates from artifactory-server
+[INFO] artifact ch.qos.logback:logback-classic: checking for updates from artifactory-server
+[INFO] artifact co.elastic.apm:apm-agent-attach: checking for updates from artifactory-server
+[INFO] artifact co.elastic.apm:apm-agent-api: checking for updates from artifactory-server
+[INFO] artifact co.elastic.apm:apm-agent-attach: checking for updates from catalist-remote-cache
+[INFO] artifact ch.qos.logback:logback-core: checking for updates from catalist-remote-cache
+[INFO] artifact co.elastic.apm:apm-agent-api: checking for updates from catalist-remote-cache
+[INFO] artifact ch.qos.logback:logback-classic: checking for updates from catalist-remote-cache
+[INFO] artifact com.fasterxml.jackson.module:jackson-module-scala_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact co.elastic.apm:apm-agent-api: checking for updates from central
+[INFO] artifact ch.qos.logback:logback-classic: checking for updates from central
+[INFO] artifact com.fasterxml.jackson.module:jackson-module-scala_2.11: checking for updates from central
+[INFO] artifact co.elastic.apm:apm-agent-attach: checking for updates from central
+[INFO] artifact ch.qos.logback:logback-core: checking for updates from central
+[INFO] artifact com.google.inject:guice: checking for updates from artifactory-server
+[INFO] artifact com.typesafe.scala-logging:scala-logging_2.11: checking for updates from artifactory-server
+[INFO] artifact commons-io:commons-io: checking for updates from artifactory-server
+[INFO] artifact com.zaxxer:HikariCP: checking for updates from artifactory-server
+[INFO] artifact io.github.classgraph:classgraph: checking for updates from artifactory-server
+[INFO] artifact com.typesafe.scala-logging:scala-logging_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact com.google.inject:guice: checking for updates from catalist-remote-cache
+[INFO] artifact com.zaxxer:HikariCP: checking for updates from catalist-remote-cache
+[INFO] artifact io.github.classgraph:classgraph: checking for updates from catalist-remote-cache
+[INFO] artifact commons-io:commons-io: checking for updates from catalist-remote-cache
+[INFO] artifact com.typesafe.scala-logging:scala-logging_2.11: checking for updates from central
+[INFO] artifact javax.servlet:javax.servlet-api: checking for updates from artifactory-server
+[INFO] artifact com.google.inject:guice: checking for updates from central
+[INFO] artifact com.zaxxer:HikariCP: checking for updates from central
+[INFO] artifact javax.servlet:jstl: checking for updates from artifactory-server
+[INFO] artifact io.github.classgraph:classgraph: checking for updates from central
+[INFO] artifact javax.websocket:javax.websocket-api: checking for updates from artifactory-server
+[INFO] artifact javax.servlet:javax.servlet-api: checking for updates from catalist-remote-cache
+[INFO] artifact javax.ws.rs:javax.ws.rs-api: checking for updates from artifactory-server
+[INFO] artifact commons-io:commons-io: checking for updates from central
+[INFO] artifact junit:junit: checking for updates from artifactory-server
+[INFO] artifact javax.websocket:javax.websocket-api: checking for updates from catalist-remote-cache
+[INFO] artifact javax.ws.rs:javax.ws.rs-api: checking for updates from catalist-remote-cache
+[INFO] artifact javax.servlet:jstl: checking for updates from catalist-remote-cache
+[INFO] artifact junit:junit: checking for updates from catalist-remote-cache
+[INFO] artifact javax.servlet:javax.servlet-api: checking for updates from central
+[INFO] artifact org.apache.commons:commons-collections4: checking for updates from artifactory-server
+[INFO] artifact org.apache.commons:commons-collections4: checking for updates from catalist-remote-cache
+[INFO] artifact javax.ws.rs:javax.ws.rs-api: checking for updates from central
+[INFO] artifact javax.websocket:javax.websocket-api: checking for updates from central
+[INFO] artifact org.eclipse.jetty:jetty-server: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.bundles.repackaged:jersey-guava: checking for updates from artifactory-server
+[INFO] artifact org.eclipse.jetty:jetty-server: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.bundles.repackaged:jersey-guava: checking for updates from catalist-remote-cache
+[INFO] artifact javax.servlet:jstl: checking for updates from central
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet: checking for updates from artifactory-server
+[INFO] artifact junit:junit: checking for updates from central
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet-core: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet: checking for updates from catalist-remote-cache
+[INFO] artifact org.apache.commons:commons-collections4: checking for updates from central
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet-core: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.core:jersey-common: checking for updates from artifactory-server
+[INFO] artifact org.eclipse.jetty:jetty-server: checking for updates from central
+[INFO] artifact org.glassfish.jersey.core:jersey-common: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.core:jersey-server: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.bundles.repackaged:jersey-guava: checking for updates from central
+[INFO] artifact org.glassfish.jersey.inject:jersey-hk2: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.core:jersey-server: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.inject:jersey-hk2: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet: checking for updates from central
+[INFO] artifact org.glassfish.jersey.containers:jersey-container-servlet-core: checking for updates from central
+[INFO] artifact org.glassfish.jersey.media:jersey-media-json-jackson: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.media:jersey-media-multipart: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.core:jersey-common: checking for updates from central
+[INFO] artifact org.glassfish.jersey.media:jersey-media-json-jackson: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.test-framework:jersey-test-framework-core: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.media:jersey-media-multipart: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.test-framework:jersey-test-framework-core: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.inject:jersey-hk2: checking for updates from central
+[INFO] artifact org.glassfish.jersey.core:jersey-server: checking for updates from central
+[INFO] artifact org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2: checking for updates from artifactory-server
+[INFO] artifact org.postgresql:postgresql: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.media:jersey-media-json-jackson: checking for updates from central
+[INFO] artifact org.scala-lang:scala-library: checking for updates from artifactory-server
+[INFO] artifact org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2: checking for updates from catalist-remote-cache
+[INFO] artifact org.postgresql:postgresql: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.media:jersey-media-multipart: checking for updates from central
+[INFO] artifact org.scala-lang.modules:scala-java8-compat_2.11: checking for updates from artifactory-server
+[INFO] artifact org.scala-lang:scala-library: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.test-framework:jersey-test-framework-core: checking for updates from central
+[INFO] artifact org.scala-lang.modules:scala-java8-compat_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact org.scalamock:scalamock_2.11: checking for updates from artifactory-server
+[INFO] artifact org.scalamock:scalamock_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2: checking for updates from central
+[INFO] artifact org.scalatest:scalatest_2.11: checking for updates from artifactory-server
+[INFO] artifact org.postgresql:postgresql: checking for updates from central
+[INFO] artifact org.slf4j:jul-to-slf4j: checking for updates from artifactory-server
+[INFO] artifact org.scala-lang:scala-library: checking for updates from central
+[INFO] artifact org.scalatest:scalatest_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact org.scala-lang.modules:scala-java8-compat_2.11: checking for updates from central
+[INFO] artifact org.slf4j:log4j-over-slf4j: checking for updates from artifactory-server
+[INFO] artifact org.tuckey:urlrewritefilter: checking for updates from artifactory-server
+[INFO] artifact org.slf4j:jul-to-slf4j: checking for updates from catalist-remote-cache
+[INFO] artifact org.slf4j:log4j-over-slf4j: checking for updates from catalist-remote-cache
+[INFO] artifact org.scalamock:scalamock_2.11: checking for updates from central
+[INFO] artifact org.tuckey:urlrewritefilter: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.capm:capm-api: checking for updates from artifactory-server
+[INFO] artifact org.scalatest:scalatest_2.11: checking for updates from central
+[INFO] artifact us.catalist.capm:capm-hk2: checking for updates from artifactory-server
+[INFO] artifact us.catalist.capm:capm-api: checking for updates from catalist-remote-cache
+[INFO] artifact org.slf4j:jul-to-slf4j: checking for updates from central
+[INFO] artifact us.catalist.commons:auth0-servlet_2.11: checking for updates from artifactory-server
+[INFO] artifact org.slf4j:log4j-over-slf4j: checking for updates from central
+[INFO] artifact org.tuckey:urlrewritefilter: checking for updates from central
+[INFO] artifact us.catalist.commons:environment: checking for updates from artifactory-server
+[INFO] artifact us.catalist.commons:identity: checking for updates from artifactory-server
+[INFO] artifact us.catalist.capm:capm-hk2: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.commons:environment: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.capm:capm-hk2: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-core: checking for updates from artifactory-server
+[INFO] artifact us.catalist.commons:auth0-servlet_2.11: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.commons:identity: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:fusion-core: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.commons:auth0-servlet_2.11: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-injection-hk2: checking for updates from artifactory-server
+[INFO] artifact us.catalist.commons:identity: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-jobs: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:fusion-core: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-logic: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:fusion-injection-hk2: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:fusion-jobs: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:fusion-logic: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:fusion-jobs: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-injection-hk2: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-persistence: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:fusion-workflow: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:fusion-logic: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-persistence: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:shaded-hadoop-hdfs: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:fusion-workflow: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:fusion-persistence: checking for updates from central
+[INFO] artifact us.catalist.ipc:ipc-hk2: checking for updates from artifactory-server
+[INFO] artifact us.catalist.fusion:shaded-hadoop-hdfs: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.fusion:shaded-hadoop-hdfs: checking for updates from central
+[INFO] artifact us.catalist.ipc:ipc-hk2: checking for updates from catalist-remote-cache
+[INFO] artifact us.catalist.ipc:ipc-hk2: checking for updates from central
+[INFO] artifact us.catalist.capm:capm-api: checking for updates from central
+[INFO] artifact us.catalist.fusion:fusion-workflow: checking for updates from central
+[INFO] artifact us.catalist.commons:environment: checking for updates from central
+[INFO] The following dependencies in Dependencies have newer versions:
+[INFO]   com.fasterxml.jackson.module:jackson-module-scala_2.11 ...
+[INFO]                                                         2.10.3 -> 2.11.0
+[INFO]   com.zaxxer:HikariCP ................................... 3.4.2 -> 3.4.3
+[INFO]   io.github.classgraph:classgraph ..................... 4.8.71 -> 4.8.78
+[INFO]
+[INFO] artifact org.eclipse.jetty:jetty-io: checking for updates from artifactory-server
+[INFO] artifact org.eclipse.jetty:jetty-http: checking for updates from artifactory-server
+[INFO] artifact org.eclipse.jetty:jetty-io: checking for updates from catalist-remote-cache
+[INFO] artifact org.eclipse.jetty:jetty-http: checking for updates from catalist-remote-cache
+[INFO] artifact org.eclipse.jetty:jetty-io: checking for updates from central
+[INFO] artifact org.eclipse.jetty:jetty-http: checking for updates from central
+[INFO] No dependencies in Plugin Dependencies have newer versions.
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.887 s
+[INFO] Finished at: 2020-05-04T11:23:57-04:00
+[INFO] ------------------------------------------------------------------------
