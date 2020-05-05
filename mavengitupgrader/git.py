@@ -51,7 +51,15 @@ class Branch:
             subprocess.run(['git', 'checkout', self.based_on],
                            check=True, cwd=self._git_directory)
 
-    def activate(self):
+    def activate(self) -> bool:
+        """
+        Check out the branch represented by this Branch object.
+
+        :raises: CalledProcessError if a git command encounters an error.
+
+        :return: True if a new branch was created or False if a pre-existing
+                 branch gets checked out
+        """
         self.prepare()
         local_exists: bool = subprocess.run(
             ['git', 'rev-parse', '--verify', self.name],
@@ -66,11 +74,13 @@ class Branch:
                          "local" if local_exists else "remote", self.name)
             subprocess.run(['git', 'checkout', self.name],
                            check=True, cwd=self._git_directory)
+            return False
         else:
             logging.info("Creating new branch %s based on %s",
                          self.name, self.based_on)
             subprocess.run(['git', 'checkout', '-b', self.name],
                            check=True, cwd=self._git_directory)
+            return True
 
     def commit(self, message: str, pom_file: str = "pom.xml"):
         subprocess.run(['git', 'add', pom_file],

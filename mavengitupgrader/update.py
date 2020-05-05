@@ -12,15 +12,15 @@ Update (in this module)
 import logging
 import os
 import re
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Optional
 
 from mavengitupgrader.git import Branch
-from mavengitupgrader.maven import Pom
+from mavengitupgrader.maven import Pom, Dependency
 
 
 class Update:
     update_line_matcher = re.compile(
-        r' {3}([a-z0-9.]+):([a-z0-9-_.]+) \.*(\n\[INFO\] *)? ([0-9.]+) -> '
+        r' {3}([a-zA-Z0-9.]+):([a-zA-Z0-9-_.]+) \.*(\n\[INFO\] *)? ([0-9.]+) -> '
         r'([0-9.]+)'
     )
 
@@ -30,6 +30,11 @@ class Update:
                  source_branch: str = "master",
                  pom_path: str = "pom.xml", _git_dir_to_make: str = None,
                  _pom_filename_to_copy: str = None):
+        if not update_line and \
+                not (group and artifact and current_version and latest_version):
+            raise ValueError("Either update_line or one of the following were"
+                             "not supplied: group, artifact, current_version, "
+                             "or latest_version")
         self.update_line = update_line
         self.source_branch = source_branch
         self._pom_path = pom_path
@@ -40,12 +45,7 @@ class Update:
         self.current_version = current_version
         self.latest_version = latest_version
         self.target_branch = None
-        self.pom_dependency = None
-        if not update_line and \
-                not (group and artifact and current_version and latest_version):
-            raise ValueError("Either update_line or one of the following were"
-                             "not supplied: group, artifact, current_version, "
-                             "or latest_version")
+        self.pom_dependency: Optional[Dependency] = None
         """
         [INFO]   io.github.classgraph:classgraph ..................... 4.8.71 -> 4.8.78
         [INFO]   com.fasterxml.jackson.module:jackson-module-scala_2.11 ...
@@ -71,9 +71,8 @@ class Update:
         self.target_branch = Branch(f"update-{artifact}", source_branch,
                                     _git_dir_to_make=_git_dir_to_make,
                                     _pom_filename_to_copy=_pom_filename_to_copy)
-        self._pom = Pom(self._pom_path)  # must be after Branch creates repo
-        self.pom_dependency = self._pom.get_dependency(
-            artifact_id=artifact, group_id=group, version=current_version)
+        # _read_pom() must be after Branch creates mock repo
+        self._read_pom(expected_current_version=current_version)
 
     def apply(self, switch_to_source_branch_afterwards: bool = True):
         if not self.parsed:
@@ -84,11 +83,18 @@ class Update:
             raise RuntimeError("Unable to locate POM dependency the given"
                                " update line refers to: "
                                + str(self.update_line))
-        self.target_branch.activate()
-        self.pom_dependency.set_version(self.latest_version)
-        self._pom.save(self._pom_path)
-        self.target_branch.commit(f"Updating dependency {str(self)}",
-                                  os.path.basename(self._pom_path))
+        is_new_branch = self.target_branch.activate()
+        if not is_new_branch:
+            # determine if existing branch already has this update
+            self._read_pom()
+        if self.pom_dependency.get_version() != self.latest_version:
+            self.pom_dependency.set_version(self.latest_version)
+            self._pom.save(self._pom_path)
+            self.target_branch.commit(f"Updating dependency {str(self)}",
+                                      os.path.basename(self._pom_path))
+        else:
+            logging.info("An existing branch appears to already have this "
+                         "update. Skipping %s", str(self))
         if switch_to_source_branch_afterwards:
             self.target_branch.prepare()
 
@@ -98,6 +104,18 @@ class Update:
                    f"{self.current_version} -> {self.latest_version}"
         else:
             return self.update_line
+
+    def _read_pom(self, expected_current_version: str = None):
+        self._pom = Pom(self._pom_path)  # must be after Branch creates mock repo
+        if expected_current_version:
+            self.pom_dependency = self._pom.get_dependency(
+                artifact_id=self.artifact, group_id=self.group,
+                version=expected_current_version
+            )
+        else:
+            self.pom_dependency = self._pom.get_dependency(
+                artifact_id=self.artifact, group_id=self.group
+            )
 
 
 def update_from_matches_tuple(matches: tuple,
