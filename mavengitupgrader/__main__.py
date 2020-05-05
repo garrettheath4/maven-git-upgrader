@@ -34,10 +34,14 @@ def main():
     git_source_branch = args.branch
     updates = calculate_updates(git_directory=git_directory,
                                 git_source_branch=git_source_branch)
+    print(f"Maven found {len(updates)} available dependency updates:")
     for update in updates:
-        print(update)
-    response = input(f"Apply the above updates to the '{git_source_branch}' "
-                     f"branch? (yes/no) [default: yes]: ")
+        print("  " + str(update))
+    if args.yes:
+        response = "yes"
+    else:
+        response = input(f"Apply the above updates to the '{git_source_branch}' "
+                         f"branch? (yes/no) [default: yes]: ")
     if not response or (response and response.lower()[0] != 'n'):
         logging.info("Applying %d updates...", len(updates))
         apply_updates(updates)
@@ -58,6 +62,11 @@ def parse_args():
                         default='master',
                         help="The Git branch in the repository to base updates "
                              "on (default: 'master' branch")
+    parser.add_argument('-y', '--yes', dest='yes', default=False,
+                        action='store_true',
+                        help="Skip any normal (non-error) interactive prompts "
+                             "and continue as if they were answered with the "
+                             "default/yes option")
     return parser.parse_args()
 
 
