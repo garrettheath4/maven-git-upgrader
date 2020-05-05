@@ -25,13 +25,13 @@ def main():
     logging.debug("Python version " + sys.version.split('\n')[0])
     logging.debug(f"__file__ = {__file__}")
     args = parse_args()
-    git_directory = args.dir
+    git_directory = args.directory
     if not git_directory:
         if wrong_current_directory():
             raise RuntimeError("Switch to a different directory before running "
                                "this module with `python3 -m mavengitupgrader`")
         logging.info("Upgrading Maven project in Git repo in current directory")
-    git_source_branch = args.branch
+    git_source_branch = args.source_branch
     updates = calculate_updates(git_directory=git_directory,
                                 git_source_branch=git_source_branch)
     print(f"Maven found {len(updates)} available dependency updates:")
@@ -44,7 +44,7 @@ def main():
                          f"branch? (yes/no) [default: yes]: ")
     if not response or (response and response.lower()[0] != 'n'):
         logging.info("Applying %d updates...", len(updates))
-        apply_updates(updates)
+        apply_updates(updates, push=args.push)
     else:
         logging.info("Exiting.")
 
@@ -54,19 +54,20 @@ def parse_args():
                   "creates a Git branch for each update for isolated testing " \
                   "and easy integration."
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-g', '--git-repo', type=str, dest='dir', default=None,
+    parser.add_argument('-d', '--directory', type=str, default=None,
                         help="The path to the directory containing a Git "
                              "repository for a valid Maven project (default: "
                              "current directory)")
-    parser.add_argument('-b', '--source-branch', type=str, dest='branch',
-                        default='master',
+    parser.add_argument('-b', '--source-branch', type=str, default='master',
                         help="The Git branch in the repository to base updates "
-                             "on (default: 'master' branch")
-    parser.add_argument('-y', '--yes', dest='yes', default=False,
-                        action='store_true',
+                             "on (default: 'master' branch)")
+    parser.add_argument('-y', '--yes', default=False, action='store_true',
                         help="Skip any normal (non-error) interactive prompts "
                              "and continue as if they were answered with the "
                              "default/yes option")
+    parser.add_argument('-p', '--push', default=False, action='store_true',
+                        help="Automatically push new branches to the remote "
+                             "'origin'")
     return parser.parse_args()
 
 

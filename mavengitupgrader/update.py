@@ -74,7 +74,8 @@ class Update:
         # _read_pom() must be after Branch creates mock repo
         self._read_pom(expected_current_version=current_version)
 
-    def apply(self, switch_to_source_branch_afterwards: bool = True):
+    def apply(self, switch_to_source_branch_afterwards: bool = True,
+              push: bool = False):
         if not self.parsed:
             raise RuntimeError("Unable to apply Update because the provided"
                                " update line was unable to be parsed: "
@@ -92,6 +93,8 @@ class Update:
             self._pom.save(self._pom_path)
             self.target_branch.commit(f"Updating dependency {str(self)}",
                                       os.path.basename(self._pom_path))
+            if push:
+                self.target_branch.push()
         else:
             logging.info("An existing branch appears to already have this "
                          "update. Skipping %s", str(self))

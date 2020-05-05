@@ -87,3 +87,7 @@ class Branch:
                        check=True, cwd=self._git_directory)
         subprocess.run(['git', 'commit', '-m', message],
                        check=True, cwd=self._git_directory)
+
+    def push(self):
+        subprocess.run(['git', 'push', '-u'],
+                       check=True, cwd=self._git_directory)
