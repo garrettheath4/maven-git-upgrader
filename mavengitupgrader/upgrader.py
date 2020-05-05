@@ -28,7 +28,7 @@ from mavengitupgrader.update import (
 )
 
 
-def stdout_to_update_list(maven_stdout: str, source_branch: str = "master") -> \
+def stdout_to_update_list(maven_stdout: str, source_branch: str = None) -> \
         List[Update]:
     matches = re.findall(Update.update_line_matcher, maven_stdout)
     logging.debug("Parsed %d available updates from Maven output", len(matches))
@@ -38,7 +38,7 @@ def stdout_to_update_list(maven_stdout: str, source_branch: str = "master") -> \
 
 
 def calculate_updates(git_directory: str = None,
-                      git_source_branch: str = "master") -> List[Update]:
+                      git_source_branch: str = None) -> List[Update]:
     """
     Runs `mvn versions:display-dependency-updates` and parses the output to
     return a list of Update objects representing the Maven project's
@@ -77,7 +77,7 @@ def apply_updates(updates: List[Update], push: bool = False):
 
 
 def calculate_and_apply_updates(git_directory: str = None,
-                                git_source_branch: str = "master"):
+                                git_source_branch: str = None):
     updates = calculate_updates(git_directory=git_directory,
                                 git_source_branch=git_source_branch)
     apply_updates(updates)

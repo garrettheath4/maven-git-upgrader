@@ -23,7 +23,6 @@ from mavengitupgrader.upgrader import calculate_updates, apply_updates
 
 def main():
     logging.debug("Python version " + sys.version.split('\n')[0])
-    logging.debug(f"__file__ = {__file__}")
     args = parse_args()
     git_directory = args.directory
     if not git_directory:
@@ -58,9 +57,9 @@ def parse_args():
                         help="The path to the directory containing a Git "
                              "repository for a valid Maven project (default: "
                              "current directory)")
-    parser.add_argument('-b', '--source-branch', type=str, default='master',
+    parser.add_argument('-b', '--source-branch', type=str, default=None,
                         help="The Git branch in the repository to base updates "
-                             "on (default: 'master' branch)")
+                             "on (default: current branch)")
     parser.add_argument('-y', '--yes', default=False, action='store_true',
                         help="Skip any normal (non-error) interactive prompts "
                              "and continue as if they were answered with the "

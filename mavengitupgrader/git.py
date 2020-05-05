@@ -7,10 +7,10 @@ import os.path
 
 
 class Branch:
-    def __init__(self, name: str, based_on: str,
+    def __init__(self, name: str, based_on_branch_name: str = None,
                  _git_dir_to_make: str = None, _pom_filename_to_copy: str = None):
         self.name = name
-        self.based_on = based_on
+        self.based_on_branch_name = based_on_branch_name
         self._git_directory = _git_dir_to_make
         if self._git_directory:
             if not os.path.isdir(self._git_directory):
@@ -30,13 +30,12 @@ class Branch:
                                 "Garrett Koller"], cwd=self._git_directory)
                 subprocess.run(['git', 'commit', '-m', "Unit test commit"],
                                check=True, cwd=self._git_directory)
+        if not self.based_on_branch_name:
+            self.based_on_branch_name = self._get_current_branch_name()
 
     def prepare(self):
         # equivalent to `git branch --show-current` but works in older versions
-        current_branch_proc = subprocess.run(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout=subprocess.PIPE, check=True, cwd=self._git_directory)
-        current_branch_str = current_branch_proc.stdout.decode('utf-8')
+        current_branch_str = self._get_current_branch_name()
         logging.debug("Current branch: %s", current_branch_str)
         if current_branch_str != self.name:
             subprocess.run(['git', 'update-index', '--refresh'],
@@ -48,7 +47,7 @@ class Branch:
                 logging.error(diff_proc.stdout)
                 logging.error("Git directory is not clean")
                 diff_proc.check_returncode()
-            subprocess.run(['git', 'checkout', self.based_on],
+            subprocess.run(['git', 'checkout', self.based_on_branch_name],
                            check=True, cwd=self._git_directory)
 
     def activate(self) -> bool:
@@ -77,7 +76,7 @@ class Branch:
             return False
         else:
             logging.info("Creating new branch %s based on %s",
-                         self.name, self.based_on)
+                         self.name, self.based_on_branch_name)
             subprocess.run(['git', 'checkout', '-b', self.name],
                            check=True, cwd=self._git_directory)
             return True
@@ -91,3 +90,9 @@ class Branch:
     def push(self):
         subprocess.run(['git', 'push', '-u'],
                        check=True, cwd=self._git_directory)
+
+    def _get_current_branch_name(self):
+        return subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=subprocess.PIPE, check=True, cwd=self._git_directory
+        ).stdout.decode('utf-8').strip()

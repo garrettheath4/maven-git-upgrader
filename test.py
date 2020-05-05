@@ -124,7 +124,7 @@ class FileHelper:
     @staticmethod
     def setup_branch_repo(test_case: unittest.TestCase) -> Branch:
         cwd1 = FileHelper._setup_repo(test_case)
-        branch = Branch(FileHelper.git_branch, based_on="master",
+        branch = Branch(FileHelper.git_branch,
                         _git_dir_to_make=FileHelper.git_dir,
                         _pom_filename_to_copy=FileHelper.pom_filename)
         FileHelper._verify_repo(test_case, cwd1)
@@ -134,7 +134,6 @@ class FileHelper:
     def setup_update_repo(test_case: unittest.TestCase) -> Update:
         cwd1 = FileHelper._setup_repo(test_case)
         update = Update(FileHelper.classgraph_update_line,
-                        source_branch="master",
                         pom_path=FileHelper.pom_path_in_git,
                         _git_dir_to_make=FileHelper.git_dir,
                         _pom_filename_to_copy=FileHelper.pom_filename)
@@ -329,7 +328,7 @@ class TestBranch(unittest.TestCase):
                        check=True, cwd=FileHelper.git_dir)
         subprocess.run(['git', 'commit', '-m', "Update in Branch A"],
                        check=True, cwd=FileHelper.git_dir)
-        branch_b = Branch(FileHelper.git_branch_b, based_on="master",
+        branch_b = Branch(FileHelper.git_branch_b,
                           _git_dir_to_make=FileHelper.git_dir,
                           _pom_filename_to_copy=FileHelper.pom_filename)
         branch_b.activate()
@@ -384,7 +383,6 @@ class TestUpdate(unittest.TestCase):
         update_a: Update = FileHelper.setup_update_repo(self)
         update_a.apply(False)
         update_b = Update(FileHelper.fusion_core_update_line,
-                          source_branch="master",
                           pom_path=FileHelper.pom_path_in_git,
                           _git_dir_to_make=FileHelper.git_dir,
                           _pom_filename_to_copy=FileHelper.pom_filename)

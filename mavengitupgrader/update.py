@@ -27,7 +27,7 @@ class Update:
     def __init__(self, update_line: str = None, group: str = None,
                  artifact: str = None, current_version: str = None,
                  latest_version: str = None,
-                 source_branch: str = "master",
+                 source_branch: str = None,
                  pom_path: str = "pom.xml", _git_dir_to_make: str = None,
                  _pom_filename_to_copy: str = None):
         if not update_line and \
@@ -122,13 +122,13 @@ class Update:
 
 
 def update_from_matches_tuple(matches: tuple,
-                              source_branch: str = "master") -> Update:
+                              source_branch: str = None) -> Update:
     (group, artifact, _, current_version, latest_version) = matches
     return Update(group=group, artifact=artifact,
                   current_version=current_version,
                   latest_version=latest_version, source_branch=source_branch)
 
 
-def update_from_matches_tuple_using_source_branch_fn(source_branch: str) -> \
-        Callable[[Tuple], Update]:
+def update_from_matches_tuple_using_source_branch_fn(
+        source_branch: str = None) -> Callable[[Tuple], Update]:
     return lambda matches: update_from_matches_tuple(matches, source_branch)
