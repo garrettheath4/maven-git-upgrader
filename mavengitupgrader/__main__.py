@@ -18,6 +18,7 @@ import logging
 import os
 import sys
 
+from mavengitupgrader.git import get_current_branch_name
 from mavengitupgrader.upgrader import calculate_updates, apply_updates
 
 
@@ -31,6 +32,8 @@ def main():
                                "this module with `python3 -m mavengitupgrader`")
         logging.info("Upgrading Maven project in Git repo in current directory")
     git_source_branch = args.source_branch
+    if not git_source_branch:
+        git_source_branch = get_current_branch_name(git_repo_path=git_directory)
     updates = calculate_updates(git_directory=git_directory,
                                 git_source_branch=git_source_branch)
     print(f"Maven found {len(updates)} available dependency updates:")

@@ -72,8 +72,9 @@ def calculate_updates(git_directory: str = None,
 def apply_updates(updates: List[Update], push: bool = False):
     for u in updates:
         u.apply(push=push)
-    logging.info("Applied updates to %d new branches. Remember to test and "
-                 "then push these branches.", len(updates))
+    logging.info("Applied updates to %d new branches.", len(updates))
+    if not push:
+        logging.info("Remember to test and then push these branches.")
 
 
 def calculate_and_apply_updates(git_directory: str = None,

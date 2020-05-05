@@ -6,6 +6,13 @@ import subprocess
 import os.path
 
 
+def get_current_branch_name(git_repo_path: str = None) -> str:
+    return subprocess.run(
+        ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        stdout=subprocess.PIPE, check=True, cwd=git_repo_path
+    ).stdout.decode('utf-8').strip()
+
+
 class Branch:
     def __init__(self, name: str, based_on_branch_name: str = None,
                  _git_dir_to_make: str = None, _pom_filename_to_copy: str = None):
@@ -31,7 +38,8 @@ class Branch:
                 subprocess.run(['git', 'commit', '-m', "Unit test commit"],
                                check=True, cwd=self._git_directory)
         if not self.based_on_branch_name:
-            self.based_on_branch_name = self._get_current_branch_name()
+            self.based_on_branch_name = \
+                get_current_branch_name(self._git_directory)
         if self.based_on_branch_name not in ('master', 'develop'):
             logging.warning("Branch '%s' will be based off of '%s' branch, "
                             "which is not the usual 'master' or 'develop' "
@@ -40,7 +48,7 @@ class Branch:
 
     def prepare(self):
         # equivalent to `git branch --show-current` but works in older versions
-        current_branch_str = self._get_current_branch_name()
+        current_branch_str = get_current_branch_name(self._git_directory)
         logging.debug("Current branch: %s", current_branch_str)
         if current_branch_str != self.name:
             subprocess.run(['git', 'update-index', '--refresh'],
@@ -93,11 +101,5 @@ class Branch:
                        check=True, cwd=self._git_directory)
 
     def push(self):
-        subprocess.run(['git', 'push', '-u'],
+        subprocess.run(['git', 'push', '--set-upstream', 'origin', self.name],
                        check=True, cwd=self._git_directory)
-
-    def _get_current_branch_name(self):
-        return subprocess.run(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout=subprocess.PIPE, check=True, cwd=self._git_directory
-        ).stdout.decode('utf-8').strip()
