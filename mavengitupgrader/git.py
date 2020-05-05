@@ -32,6 +32,11 @@ class Branch:
                                check=True, cwd=self._git_directory)
         if not self.based_on_branch_name:
             self.based_on_branch_name = self._get_current_branch_name()
+        if self.based_on_branch_name not in ('master', 'develop'):
+            logging.warning("Branch '%s' will be based off of '%s' branch, "
+                            "which is not the usual 'master' or 'develop' "
+                            "branch",
+                            self.name, self.based_on_branch_name)
 
     def prepare(self):
         # equivalent to `git branch --show-current` but works in older versions
