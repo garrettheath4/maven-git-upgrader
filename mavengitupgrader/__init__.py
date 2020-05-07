@@ -8,7 +8,7 @@ branch for each update for isolated testing and easy integration.
 __author__ = "Garrett Heath Koller"
 __copyright__ = "Copyright 2020, Garrett Heath Koller"
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __maintainer__ = "Garrett Heath Koller"
 __email__ = "garrettheath4@gmail.com"
 __status__ = "Stable"
