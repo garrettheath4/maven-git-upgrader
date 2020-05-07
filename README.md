@@ -13,3 +13,38 @@ python3 -m mavengitupgrader
 ```
 
 For more options, run `python3 -m mavengitupgrader -h`.
+
+## Install
+
+```shell script
+pip3 install mavengitupgrader
+```
+
+## Publishing
+
+This project is distributed to [PyPI.org] in order to be freely available and
+easily downloadable from there.
+
+### Automated
+
+This GitHub repository has been configured with a [GitHub Action] that will
+automatically trigger the
+[`pythonpublish.yml`](.github/workflows/pythonpublish.yml) workflow to publish
+this project to PyPi every time a release is created in this GitHub repository.
+
+### Manual
+
+If you must publish this project manually to PyPi, do this:
+
+```shell script
+pip3 install twine wheel
+python3 setup.py sdist bdist_wheel
+twine --repository mavengitupgrader  # optional, use if PyPI token in ~/.pypirc
+twine upload dist/*
+```
+
+
+
+<!-- Links -->
+[PyPI.org]: https://pypi.org/project/mavengitupgrader/
+[GitHub Action]: https://pypi.org/project/mavengitupgrader/
