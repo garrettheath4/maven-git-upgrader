@@ -37,8 +37,8 @@ this project to PyPi every time a release is created in this GitHub repository.
 If you must publish this project manually to PyPi, do this:
 
 ```shell script
-pip3 install twine wheel
-python3 setup.py sdist bdist_wheel
+pip3 install twine
+python3 setup.py sdist
 twine --repository mavengitupgrader  # optional, use if PyPI token in ~/.pypirc
 twine upload dist/*
 ```
