@@ -8,10 +8,10 @@ branch for each update for isolated testing and easy integration.
 __author__ = "Garrett Heath Koller"
 __copyright__ = "Copyright 2020, Garrett Heath Koller"
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __maintainer__ = "Garrett Heath Koller"
 __email__ = "garrettheath4@gmail.com"
-__status__ = "Prototype"
+__status__ = "Stable"
 
 import argparse
 import logging
@@ -36,6 +36,9 @@ def main():
         git_source_branch = get_current_branch_name(git_repo_path=git_directory)
     updates = calculate_updates(git_directory=git_directory,
                                 git_source_branch=git_source_branch)
+    if updates:
+        print(f"No updates found for Maven dependencies. Exiting.")
+        return
     print(f"Maven found {len(updates)} available dependency updates:")
     for update in updates:
         print("  " + str(update))
@@ -52,10 +55,11 @@ def main():
 
 
 def parse_args():
+    command = "python3 -m mavengitupgrader"
     description = "Checks for updates to dependencies in a Maven project and " \
                   "creates a Git branch for each update for isolated testing " \
                   "and easy integration."
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(prog=command, description=description)
     parser.add_argument('-d', '--directory', type=str, default=None,
                         help="The path to the directory containing a Git "
                              "repository for a valid Maven project (default: "

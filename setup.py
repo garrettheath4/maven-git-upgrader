@@ -1,4 +1,22 @@
 from distutils.core import setup
+import codecs
+import os.path
+
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
 
 with open("README.md", 'r') as fh:
     long_description = fh.read()
@@ -6,7 +24,7 @@ with open("README.md", 'r') as fh:
 setup(
   name='mavengitupgrader',
   packages=['mavengitupgrader'],
-  version='1.0.0',
+  version=get_version("mavengitupgrader/__init__.py"),
   license='MIT',
   description='A utility that checks for updates to Maven dependencies and creates new Git branches for each.',
   long_description=long_description,
